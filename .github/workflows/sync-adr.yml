@@ -4,15 +4,20 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs/adr/**'
   discussion:
     types: [created, edited]
 
 jobs:
   sync-adr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      discussions: write
 
     steps:
       - name: Run ADR Sync Action
-        uses: yujiosaka/adr-sync@v1
+        uses: yujiosaka/adr-sync@aebe34f478ff8959248316b9b7b380cd19f225b5 # v1.0.0
         with:
           github-token: ${{ secrets.ADR_Update }}
