@@ -34,7 +34,7 @@ jobs:
           IMAGE_TAG=sha-${{ github.sha }}
           for service in sfa-service css-service marketing-service analytics-service \
             ai-orchestration-service identity-service integration-service \
-            notification-service platform-admin-service; do
+            notification-service platform-admin-service staff-bff; do
             echo "Building $service"
             docker build -t ${{ env.ACR_NAME }}.azurecr.io/$service:$IMAGE_TAG \
               src/services/$service
