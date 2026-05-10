@@ -26,9 +26,9 @@ public static class SfaInternalEndpoints
             var weekAgo = DateTime.UtcNow.AddDays(-7);
 
             var openLeads          = await db.Leads.CountAsync(l => l.Status == LeadStatus.New || l.Status == LeadStatus.Contacted, ct);
-            var openOpportunities  = await db.Opportunities.CountAsync(o => o.Stage != OpportunityStage.Won && o.Stage != OpportunityStage.Lost, ct);
+            var openOpportunities  = await db.Opportunities.CountAsync(o => o.Stage != OpportunityStage.ClosedWon && o.Stage != OpportunityStage.ClosedLost, ct);
             var pipelineValue      = await db.Opportunities
-                .Where(o => o.Stage != OpportunityStage.Won && o.Stage != OpportunityStage.Lost)
+                .Where(o => o.Stage != OpportunityStage.ClosedWon && o.Stage != OpportunityStage.ClosedLost)
                 .SumAsync(o => o.Value, ct);
             var activitiesThisWeek = await db.Activities.CountAsync(a => a.OccurredAt >= weekAgo, ct);
 

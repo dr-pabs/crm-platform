@@ -37,7 +37,7 @@ public sealed class Quote : BaseEntity
     /// <summary>Marks the quote as Sent. Opportunity must be in Negotiate or Won stage.</summary>
     public void Send(OpportunityStage opportunityStage)
     {
-        if (opportunityStage < OpportunityStage.Negotiate)
+        if (opportunityStage < OpportunityStage.Negotiation)
             throw new InvalidOperationException(
                 "A quote may only be sent when the opportunity is in Negotiate stage or later.");
         if (Status != QuoteStatus.Draft)

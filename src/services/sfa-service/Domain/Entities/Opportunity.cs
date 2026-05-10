@@ -6,14 +6,14 @@ namespace CrmPlatform.SfaService.Domain.Entities;
 
 /// <summary>
 /// A sales opportunity in the pipeline.
-/// Stage must advance sequentially: Qualify → Propose → Negotiate → Won | Lost.
+/// Stage must advance sequentially: Prospecting → Qualification → Proposal → Negotiation → ClosedWon | ClosedLost.
 /// </summary>
 public sealed class Opportunity : BaseEntity
 {
     private Opportunity() { } // EF Core
 
     public string           Title              { get; private set; } = string.Empty;
-    public OpportunityStage Stage              { get; private set; } = OpportunityStage.Qualify;
+    public OpportunityStage Stage              { get; private set; } = OpportunityStage.Prospecting;
     public decimal          Value              { get; private set; }
     public DateTime?        CloseDate          { get; private set; }
     public Guid?            ContactId          { get; private set; }
@@ -28,7 +28,7 @@ public sealed class Opportunity : BaseEntity
     // Activities are queried directly by RelatedEntityId + RelatedEntityType = "Opportunity"
     // No EF navigation — Activity is a polymorphic entity shared across Lead/Opportunity/Contact.
 
-    private static readonly OpportunityStage[] TerminalStages = [OpportunityStage.Won, OpportunityStage.Lost];
+    private static readonly OpportunityStage[] TerminalStages = [OpportunityStage.ClosedWon, OpportunityStage.ClosedLost];
 
     public static Opportunity Create(
         Guid tenantId,
@@ -46,7 +46,7 @@ public sealed class Opportunity : BaseEntity
         {
             TenantId             = tenantId,
             Title                = title,
-            Stage                = OpportunityStage.Qualify,
+            Stage                = OpportunityStage.Prospecting,
             Value                = value,
             ContactId            = contactId,
             AccountId            = accountId,
@@ -56,15 +56,15 @@ public sealed class Opportunity : BaseEntity
     }
 
     /// <summary>
-    /// Advances the stage by exactly one step, or to Won/Lost from any non-terminal stage.
-    /// Skipping stages (e.g. Qualify → Negotiate) is not permitted.
+    /// Advances the stage by exactly one step, or to ClosedWon/ClosedLost from any non-terminal stage.
+    /// Skipping stages (e.g. Prospecting → Proposal) is not permitted.
     /// </summary>
     public void AdvanceStage(OpportunityStage nextStage)
     {
         if (TerminalStages.Contains(Stage))
             throw new InvalidOperationException($"Opportunity is already in terminal stage {Stage}.");
 
-        var isTerminalTarget = nextStage is OpportunityStage.Won or OpportunityStage.Lost;
+        var isTerminalTarget = nextStage is OpportunityStage.ClosedWon or OpportunityStage.ClosedLost;
         var isSequential     = (int)nextStage == (int)Stage + 1;
 
         if (!isTerminalTarget && !isSequential)
@@ -74,9 +74,9 @@ public sealed class Opportunity : BaseEntity
         var previous = Stage;
         Stage = nextStage;
 
-        if (nextStage == OpportunityStage.Won)
+        if (nextStage == OpportunityStage.ClosedWon)
             AddDomainEvent(new OpportunityWonEvent(Id, TenantId, Value, AccountId));
-        else if (nextStage == OpportunityStage.Lost)
+        else if (nextStage == OpportunityStage.ClosedLost)
             AddDomainEvent(new OpportunityLostEvent(Id, TenantId));
         else
             AddDomainEvent(new OpportunityStageChangedEvent(Id, TenantId, previous.ToString(), nextStage.ToString()));
