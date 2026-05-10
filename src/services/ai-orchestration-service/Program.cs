@@ -95,6 +95,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// ─── Database migration ───────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AiDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 // ─── Middleware pipeline ──────────────────────────────────────────────────────
 app.UseProblemDetails();
 app.UseStaticFiles();          // Serves wwwroot/.well-known/ai-plugin.json

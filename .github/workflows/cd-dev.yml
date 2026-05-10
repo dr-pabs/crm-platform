@@ -45,7 +45,7 @@ jobs:
       - name: Microsoft Defender — image vulnerability scan
         run: |
           IMAGE_TAG=sha-${{ github.sha }}
-          # Trigger a scan and wait for results. In dev we warn rather than block.
+          # List existing Defender tasks for each image. In dev we surface findings without blocking.
           for service in sfa-service css-service marketing-service analytics-service \
             ai-orchestration-service identity-service integration-service \
             notification-service platform-admin-service; do
@@ -63,6 +63,21 @@ jobs:
           template: infra/platform/main.bicep
           parameters: infra/platform/parameters/dev.bicepparam imageTag=sha-${{ github.sha }}
 
+      - name: Apply EF Core migrations
+        run: |
+          dotnet tool install --global dotnet-ef --ignore-failed-sources || true
+          SQL_FQDN=$(az deployment sub show \
+            --name apiManagement \
+            --query properties.outputs.sqlServerFqdn.value -o tsv 2>/dev/null || echo "")
+          if [[ -z "$SQL_FQDN" ]]; then
+            echo "WARNING: Could not retrieve SQL FQDN from deployment outputs — skipping migration step"
+            exit 0
+          fi
+          CONNECTION_STRING="Server=$SQL_FQDN;Database=CrmPlatform;Authentication=Active Directory Default;Encrypt=True;" \
+            ./scripts/apply-migrations.sh
+        env:
+          DOTNET_ROOT: /usr/share/dotnet
+
       - name: Smoke tests — verify health endpoints
         run: |
           # Wait for Container Apps to become ready (up to 3 minutes)
@@ -70,7 +85,7 @@ jobs:
           APIM_URL="${{ env.APIM_URL }}"
           EXIT_CODE=0
           for service_path in sfa css marketing analytics identity notification platform; do
-            HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
               "${APIM_URL}/api/v1/${service_path}/health/ready" \
               --retry 5 --retry-delay 10 || echo "000")
             if [ "${HTTP_STATUS}" = "200" ]; then

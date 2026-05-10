@@ -38,13 +38,14 @@ jobs:
             --query "[?contains(resourceDetails.id, '${IMAGE_TAG}') && properties.status.code=='Unhealthy'].{name:name,severity:metadata.severity}" \
             --output json | \
           python3 -c "
-          import json, sys
+          import json, sys, os
+          image_tag = os.environ.get('IMAGE_TAG', '')
           assessments = json.load(sys.stdin)
           critical = [a for a in assessments if a.get('severity','').lower() == 'critical']
           if critical:
-              print(f'::error::Found {len(critical)} critical CVEs in image {\"$IMAGE_TAG\"} — blocking deployment')
+              print(f'::error::Found {len(critical)} critical CVEs in image {image_tag} — blocking deployment')
               sys.exit(1)
-          print(f'No critical CVEs found in image {\"$IMAGE_TAG\"}')
+          print(f'No critical CVEs found in image {image_tag}')
           "
 
       - name: Bicep what-if (displayed in approval)
@@ -127,7 +128,7 @@ jobs:
           APIM_URL="https://crm-prod-apim.azure-api.net"
           for service_path in sfa css marketing analytics identity notification platform; do
             echo "Checking ${service_path} health..."
-            HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
               "${APIM_URL}/api/v1/${service_path}/health/ready" || echo "000")
             if [ "${HTTP_STATUS}" != "200" ]; then
               echo "::error::Health check failed for ${service_path}: HTTP ${HTTP_STATUS}"

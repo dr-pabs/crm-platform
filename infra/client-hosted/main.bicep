@@ -1,71 +1,63 @@
-// CRM Platform — Main Bicep entry point
-// Orchestrates all platform modules for a given environment.
-// Deploy via: az deployment sub create --location uksouth --template-file main.bicep --parameters @parameters/prod.bicepparam
+// infra/client-hosted/main.bicep
+// Client-hosted deployment — provisions a dedicated single-tenant CRM environment
+// for clients who require data residency or isolated infrastructure.
+//
+// Deploy via:
+//   az deployment sub create \
+//     --location <region> \
+//     --template-file infra/client-hosted/main.bicep \
+//     --parameters @infra/client-hosted/parameters/<client-id>.bicepparam
+//
+// See parameters/client-template.bicepparam for all required values.
 
 targetScope = 'subscription'
 
-@description('Environment name (dev | test | staging | prod)')
-@allowed(['dev', 'test', 'staging', 'prod'])
-param environment string
+@description('Deployment environment (always "prod" for client-hosted)')
+@allowed(['prod', 'staging'])
+param environment string = 'prod'
 
 @description('Azure region for all resources')
 param location string = 'uksouth'
 
-@description('Resource group name')
-param resourceGroupName string = 'crm-${environment}-rg'
+@description('Resource group name — unique per client deployment')
+param resourceGroupName string
 
-@description('Container image tag to deploy')
+@description('Container image tag (must match a scanned image from the platform ACR)')
 param imageTag string
 
 @description('Publisher email for APIM')
 param publisherEmail string
 
-@description('Publisher organisation name for APIM')
+@description('Publisher organisation name')
 param publisherName string = 'CRM Platform'
 
-@description('Entra ID tenant ID for JWT validation')
+@description('Entra ID tenant ID for JWT validation (platform Entra tenant)')
 param entraTenantId string
 
-@description('Entra ID audience (App Registration client ID)')
+@description('Entra External ID audience for this client tenant')
 param entraAudience string
 
 @description('Object ID of the deployment principal (for SQL AAD admin)')
 param deploymentPrincipalObjectId string
 
-@description('Whether to provision an analytics named replica')
-param provisionAnalyticsReplica bool = environment == 'prod'
+@description('Client identifier — short, lowercase, alphanumeric only (used in resource names)')
+@minLength(3)
+@maxLength(12)
+param clientId string
 
 // ─── Resource name helpers ────────────────────────────────────────────────────
-var prefix = 'crm-${environment}'
-var sqlServerName        = '${prefix}-sql'
-var sbNamespaceName      = '${prefix}-sb'
-var keyVaultName         = '${prefix}-kv'
-var storageAccountName   = replace('${prefix}sa', '-', '')
-var appConfigName        = '${prefix}-appconfig'
-var apimName             = '${prefix}-apim'
-var staffPortalName      = '${prefix}-staff-portal'
-var customerPortalName   = '${prefix}-customer-portal'
-var acrName              = replace('${prefix}acr', '-', '')
-var logAnalyticsName     = '${prefix}-logs'
-var containerEnvName     = '${prefix}-cae'
-
-// ─── SKU map per environment ──────────────────────────────────────────────────
-var sqlSkuTier     = environment == 'prod' ? 'Hyperscale' : 'GeneralPurpose'
-var sqlVCores      = environment == 'prod' ? 4 : 2
-var sbCapacity     = environment == 'prod' ? 2 : 1
-var storageSku     = environment == 'prod' ? 'Standard_ZRS' : 'Standard_LRS'
-var apimSku        = environment == 'prod' ? 'Premium' : 'Developer'
-var swaSku         = environment == 'prod' ? 'Standard' : 'Free'
-var appConfigSku   = environment == 'prod' ? 'standard' : 'free'
-var acrSku         = environment == 'prod' ? 'Premium' : 'Standard'
-var logRetention   = environment == 'prod' ? 90 : 30
-var caWorkload     = environment == 'prod'
-
-// ─── Per-service resource sizing ─────────────────────────────────────────────
-var svcCpu    = environment == 'prod' ? '0.5' : '0.25'
-var svcMemory = environment == 'prod' ? '1.0Gi' : '0.5Gi'
-var svcMin    = environment == 'prod' ? 2 : 1
-var svcMax    = environment == 'prod' ? 20 : 5
+var prefix           = 'crm-${clientId}'
+var acrName          = replace('${prefix}acr', '-', '')
+var logAnalyticsName = '${prefix}-logs'
+var containerEnvName = '${prefix}-cae'
+var sqlServerName    = '${prefix}-sql'
+var sbNamespaceName  = '${prefix}-sb'
+var keyVaultName     = '${prefix}-kv'
+var storageAcctName  = replace('${prefix}sa', '-', '')
+var appConfigName    = '${prefix}-appconfig'
+var apimName         = '${prefix}-apim'
+var staffPortalName  = '${prefix}-staff-portal'
+var customerPortalName = '${prefix}-customer-portal'
 
 // ─── Resource Group ───────────────────────────────────────────────────────────
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -74,30 +66,31 @@ resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   tags: {
     environment: environment
     project: 'crm-platform'
+    client: clientId
     managedBy: 'bicep'
   }
 }
 
-// ─── Log Analytics ────────────────────────────────────────────────────────────
+// ─── Observability ────────────────────────────────────────────────────────────
 module logAnalytics '../modules/logAnalytics.bicep' = {
   name: 'logAnalytics'
   scope: rg
   params: {
     location: location
     workspaceName: logAnalyticsName
-    retentionDays: logRetention
+    retentionDays: 90
     tags: rg.tags
   }
 }
 
-// ─── Azure Container Registry ─────────────────────────────────────────────────
+// ─── Container Registry (client-dedicated for data-residency compliance) ──────
 module acr '../modules/containerRegistry.bicep' = {
   name: 'containerRegistry'
   scope: rg
   params: {
     location: location
     acrName: acrName
-    sku: acrSku
+    sku: 'Premium'
     adminUserEnabled: false
     tags: rg.tags
   }
@@ -121,8 +114,8 @@ module storage '../modules/storageAccount.bicep' = {
   scope: rg
   params: {
     location: location
-    storageAccountName: storageAccountName
-    sku: storageSku
+    storageAccountName: storageAcctName
+    sku: 'Standard_ZRS'
     blobContainers: ['attachments', 'durable-functions']
     tags: rg.tags
   }
@@ -135,7 +128,7 @@ module serviceBus '../modules/serviceBus.bicep' = {
   params: {
     location: location
     namespaceName: sbNamespaceName
-    capacity: sbCapacity
+    capacity: 2
     tags: rg.tags
   }
 }
@@ -148,11 +141,11 @@ module sql '../modules/sqlDatabase.bicep' = {
     location: location
     serverName: sqlServerName
     databaseName: 'CrmPlatform'
-    skuTier: sqlSkuTier
-    vCores: sqlVCores
-    provisionAnalyticsReplica: provisionAnalyticsReplica
+    skuTier: 'Hyperscale'
+    vCores: 4
+    provisionAnalyticsReplica: true
     sqlAdminObjectId: deploymentPrincipalObjectId
-    sqlAdminDisplayName: 'crm-platform-sql-admin'
+    sqlAdminDisplayName: '${prefix}-sql-admin'
     tags: rg.tags
   }
 }
@@ -164,10 +157,11 @@ module appConfig '../modules/appConfiguration.bicep' = {
   params: {
     location: location
     appConfigName: appConfigName
-    sku: appConfigSku
+    sku: 'standard'
     tags: rg.tags
     initialKeyValues: [
       { key: 'CRM:Environment', value: environment }
+      { key: 'CRM:ClientId',    value: clientId    }
       { key: 'CRM:ImageTag',    value: imageTag    }
     ]
   }
@@ -182,15 +176,14 @@ module containerEnv '../modules/containerAppsEnvironment.bicep' = {
     environmentName: containerEnvName
     logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
     logAnalyticsWorkspaceKey: logAnalytics.outputs.sharedKey
-    useWorkloadProfile: caWorkload
+    useWorkloadProfile: true
     tags: rg.tags
   }
 }
 
-// ─── Container Apps — one per service ─────────────────────────────────────────
-// Common env vars injected into every service container
+// ─── Container Apps ───────────────────────────────────────────────────────────
 var commonEnvVars = [
-  { name: 'ASPNETCORE_ENVIRONMENT', value: environment == 'dev' ? 'Development' : 'Production' }
+  { name: 'ASPNETCORE_ENVIRONMENT', value: 'Production' }
   { name: 'ConnectionStrings__Default', secretRef: 'sql-connection-string' }
   { name: 'ServiceBus__ConnectionString', secretRef: 'sb-connection-string' }
   { name: 'Entra__TenantId', value: entraTenantId }
@@ -207,10 +200,10 @@ module sfaService '../modules/containerApp.bicep' = {
     containerImage: '${acr.outputs.loginServer}/sfa-service:${imageTag}'
     acrServer: acr.outputs.loginServer
     envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
     externalIngress: false
   }
 }
@@ -225,10 +218,10 @@ module cssService '../modules/containerApp.bicep' = {
     containerImage: '${acr.outputs.loginServer}/css-service:${imageTag}'
     acrServer: acr.outputs.loginServer
     envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
     externalIngress: false
   }
 }
@@ -243,10 +236,10 @@ module marketingService '../modules/containerApp.bicep' = {
     containerImage: '${acr.outputs.loginServer}/marketing-service:${imageTag}'
     acrServer: acr.outputs.loginServer
     envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
     externalIngress: false
   }
 }
@@ -261,100 +254,10 @@ module analyticsService '../modules/containerApp.bicep' = {
     containerImage: '${acr.outputs.loginServer}/analytics-service:${imageTag}'
     acrServer: acr.outputs.loginServer
     envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
-    externalIngress: false
-  }
-}
-
-module aiOrchestrationService '../modules/containerApp.bicep' = {
-  name: 'aiOrchestrationService'
-  scope: rg
-  params: {
-    appName: '${prefix}-ai-orch'
-    location: location
-    containerAppsEnvironmentId: containerEnv.outputs.environmentId
-    containerImage: '${acr.outputs.loginServer}/ai-orchestration-service:${imageTag}'
-    acrServer: acr.outputs.loginServer
-    envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
-    externalIngress: false
-  }
-}
-
-module identityService '../modules/containerApp.bicep' = {
-  name: 'identityService'
-  scope: rg
-  params: {
-    appName: '${prefix}-identity'
-    location: location
-    containerAppsEnvironmentId: containerEnv.outputs.environmentId
-    containerImage: '${acr.outputs.loginServer}/identity-service:${imageTag}'
-    acrServer: acr.outputs.loginServer
-    envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
-    externalIngress: false
-  }
-}
-
-module integrationService '../modules/containerApp.bicep' = {
-  name: 'integrationService'
-  scope: rg
-  params: {
-    appName: '${prefix}-integration'
-    location: location
-    containerAppsEnvironmentId: containerEnv.outputs.environmentId
-    containerImage: '${acr.outputs.loginServer}/integration-service:${imageTag}'
-    acrServer: acr.outputs.loginServer
-    envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
-    externalIngress: false
-  }
-}
-
-module notificationService '../modules/containerApp.bicep' = {
-  name: 'notificationService'
-  scope: rg
-  params: {
-    appName: '${prefix}-notification'
-    location: location
-    containerAppsEnvironmentId: containerEnv.outputs.environmentId
-    containerImage: '${acr.outputs.loginServer}/notification-service:${imageTag}'
-    acrServer: acr.outputs.loginServer
-    envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
-    externalIngress: false
-  }
-}
-
-module platformAdminService '../modules/containerApp.bicep' = {
-  name: 'platformAdminService'
-  scope: rg
-  params: {
-    appName: '${prefix}-platform-admin'
-    location: location
-    containerAppsEnvironmentId: containerEnv.outputs.environmentId
-    containerImage: '${acr.outputs.loginServer}/platform-admin-service:${imageTag}'
-    acrServer: acr.outputs.loginServer
-    envVars: commonEnvVars
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
     externalIngress: false
   }
 }
@@ -374,10 +277,46 @@ module staffBff '../modules/containerApp.bicep' = {
       { name: 'ServiceClients__MarketingService__BaseAddress', value: 'https://${marketingService.outputs.fqdn}' }
       { name: 'ServiceClients__AnalyticsService__BaseAddress', value: 'https://${analyticsService.outputs.fqdn}' }
     ])
-    minReplicas: svcMin
-    maxReplicas: svcMax
-    cpu: svcCpu
-    memory: svcMemory
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
+    externalIngress: false
+  }
+}
+
+module identityService '../modules/containerApp.bicep' = {
+  name: 'identityService'
+  scope: rg
+  params: {
+    appName: '${prefix}-identity'
+    location: location
+    containerAppsEnvironmentId: containerEnv.outputs.environmentId
+    containerImage: '${acr.outputs.loginServer}/identity-service:${imageTag}'
+    acrServer: acr.outputs.loginServer
+    envVars: commonEnvVars
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
+    externalIngress: false
+  }
+}
+
+module platformAdminService '../modules/containerApp.bicep' = {
+  name: 'platformAdminService'
+  scope: rg
+  params: {
+    appName: '${prefix}-platform-admin'
+    location: location
+    containerAppsEnvironmentId: containerEnv.outputs.environmentId
+    containerImage: '${acr.outputs.loginServer}/platform-admin-service:${imageTag}'
+    acrServer: acr.outputs.loginServer
+    envVars: commonEnvVars
+    minReplicas: 2
+    maxReplicas: 20
+    cpu: '0.5'
+    memory: '1.0Gi'
     externalIngress: false
   }
 }
@@ -391,7 +330,7 @@ module apim '../modules/apiManagement.bicep' = {
     apimName: apimName
     publisherEmail: publisherEmail
     publisherName: publisherName
-    sku: apimSku
+    sku: 'Premium'
     skuCapacity: 1
     entraTenantId: entraTenantId
     entraAudience: entraAudience
@@ -414,7 +353,7 @@ module staffPortal '../modules/staticWebApp.bicep' = {
   params: {
     location: location
     staticWebAppName: staffPortalName
-    sku: swaSku
+    sku: 'Standard'
     tags: rg.tags
   }
 }
@@ -425,19 +364,15 @@ module customerPortal '../modules/staticWebApp.bicep' = {
   params: {
     location: location
     staticWebAppName: customerPortalName
-    sku: swaSku
+    sku: 'Standard'
     tags: rg.tags
   }
 }
 
-// ─── Outputs (referenced by CI/CD pipelines) ──────────────────────────────────
-output resourceGroupName string       = rg.name
-output keyVaultUri string             = keyVault.outputs.keyVaultUri
-output sqlServerFqdn string           = sql.outputs.serverFqdn
-output serviceBusFqdn string          = serviceBus.outputs.namespaceFqdn
-output appConfigEndpoint string       = appConfig.outputs.appConfigEndpoint
-output apimGatewayUrl string          = apim.outputs.apimGatewayUrl
-output acrLoginServer string          = acr.outputs.loginServer
-output containerEnvDomain string      = containerEnv.outputs.defaultDomain
-output staffPortalHostname string     = staffPortal.outputs.defaultHostname
-output customerPortalHostname string  = customerPortal.outputs.defaultHostname
+// ─── Outputs ─────────────────────────────────────────────────────────────────
+output resourceGroupName string      = rg.name
+output apimGatewayUrl string         = apim.outputs.apimGatewayUrl
+output acrLoginServer string         = acr.outputs.loginServer
+output containerEnvDomain string     = containerEnv.outputs.defaultDomain
+output staffPortalHostname string    = staffPortal.outputs.defaultHostname
+output customerPortalHostname string = customerPortal.outputs.defaultHostname

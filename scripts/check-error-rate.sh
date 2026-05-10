@@ -23,7 +23,7 @@ echo "Monitoring error rate for ${DURATION} minutes (threshold: ${THRESHOLD}%)"
 APP_ID="${AZURE_APP_INSIGHTS_APP_ID:?AZURE_APP_INSIGHTS_APP_ID must be set}"
 API_KEY="${AZURE_APP_INSIGHTS_API_KEY:?AZURE_APP_INSIGHTS_API_KEY must be set}"
 
-QUERY="requests | where timestamp > ago(${DURATION}m) | summarize total=count(), errors=countif(resultCode >= '500') | extend errorRate=iff(total==0, 0.0, errors*100.0/total) | project errorRate"
+QUERY="requests | where timestamp > ago(${DURATION}m) | summarize total=count(), errors=countif(toint(resultCode) >= 500) | extend errorRate=iff(total==0, 0.0, errors*100.0/total) | project errorRate"
 ENCODED_QUERY=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "${QUERY}")
 
 RESPONSE=$(curl -sf \
