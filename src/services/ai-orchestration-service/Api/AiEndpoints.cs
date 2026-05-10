@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using CrmPlatform.AiOrchestrationService.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using CrmPlatform.AiOrchestrationService.Api.Dtos;
 using CrmPlatform.AiOrchestrationService.Application;
 using CrmPlatform.AiOrchestrationService.Domain.Enums;
@@ -177,6 +179,39 @@ public static class AiEndpoints
         })
         .WithName("DeletePromptTemplate")
         .Produces(StatusCodes.Status204NoContent);
+
+        
+        // ── Eval endpoints ──────────────────────────────────────────────────
+        sync.MapPost("/eval/feedback/{resultId:guid}", async (
+            Guid resultId,
+            [FromBody] AiFeedbackRequest req,
+            AiDbContext db,
+            CancellationToken ct) =>
+        {
+            var result = await db.AiResults.FirstOrDefaultAsync(r => r.Id == resultId, ct);
+            if (result is null) return Results.NotFound();
+            result.RecordFeedback(req.Feedback, req.EditedOutput, req.IsAccepted);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        })
+        .WithName("SubmitAiFeedback")
+        .WithSummary("Submit feedback on an AI result")
+        .Produces(StatusCodes.Status204NoContent);
+
+        sync.MapGet("/eval/metrics", async (
+            AiDbContext db,
+            CapabilityType? capability,
+            CancellationToken ct) =>
+        {
+            var tenantId = db.Entry(new { }).Property<Guid>("TenantId").CurrentValue;
+            var q = db.AiResults.AsQueryable();
+            if (capability.HasValue) q = q.Where(r => r.CapabilityType == capability.Value);
+            var total = await q.CountAsync(ct);
+            var accepted = await q.CountAsync(r => r.IsAccepted, ct);
+            return Results.Ok(new { total, accepted, acceptanceRate = total > 0 ? (double)accepted / total : 0 });
+        })
+        .WithName("GetAiEvalMetrics")
+        .WithSummary("Get AI evaluation metrics");
 
         return app;
     }
