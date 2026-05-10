@@ -54,6 +54,7 @@ function SupportIcon() {
   );
 }
 
+function DocumentTextIcon() { return <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>; }
 function MegaphoneIcon() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,7 +116,8 @@ export function Sidebar() {
     { key: 'opportunities', label: t('nav.opportunities'), path: '/opportunities', icon: <TrendingUpIcon /> },
     { key: 'cases',         label: t('nav.cases'),         path: '/cases',         icon: <SupportIcon /> },
     { key: 'campaigns',     label: t('nav.campaigns'),     path: '/campaigns',     icon: <MegaphoneIcon /> },
-    { key: 'journeys',      label: t('nav.journeys'),      path: '/journeys',      icon: <MapIcon /> },
+    { key: 'journeys', label: t('nav.journeys'),      path: '/journeys',      icon: <MapIcon /> },
+    { key: 'quotes',        label: t('nav.quotes'),        path: '/quotes',        icon: <DocumentTextIcon /> },      label: t('nav.journeys'),      path: '/journeys',      icon: <MapIcon /> },
     { key: 'analytics',     label: t('nav.analytics'),     path: '/analytics',     icon: <ChartBarIcon /> },
     { key: 'notifications', label: t('nav.notifications'), path: '/notifications', icon: <BellIcon /> },
     { key: 'settings',      label: t('nav.settings'),      path: '/settings',      icon: <CogIcon /> },

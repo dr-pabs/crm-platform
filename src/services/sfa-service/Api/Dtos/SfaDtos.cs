@@ -143,6 +143,31 @@ public sealed record ActivityResponse(
     string?      Notes,
     DateTime     CreatedAt);
 
+
+// ─── Quote DTOs ──────────────────────────────────────────────────────────────
+
+public sealed record CreateQuoteRequest(
+    Guid      OpportunityId,
+    decimal   TotalValue,
+    DateTime? ValidUntil);
+
+public sealed record SendQuoteRequest();
+
+public sealed record QuoteResponse(
+    Guid        Id,
+    Guid        OpportunityId,
+    string      LineItemsJson,
+    decimal     TotalValue,
+    string      Status,
+    DateTime?   ValidUntil,
+    DateTime    CreatedAt,
+    DateTime    UpdatedAt);
+
+public sealed record PagedQuotesResponse(
+    IReadOnlyList<QuoteResponse> Items,
+    int TotalCount,
+    int Page,
+    int PageSize);
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
 public sealed record ConvertLeadResponse(Guid OpportunityId);

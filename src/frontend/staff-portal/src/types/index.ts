@@ -32,6 +32,28 @@ export interface UserProfile {
   avatarUrl?: string;
 }
 
+
+// ── SFA — Quotes ──────────────────────────────────────────────────────────────
+
+export type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Rejected";
+
+export interface Quote {
+  id: string;
+  tenantId: string;
+  opportunityId: string;
+  lineItemsJson: string;
+  totalValue: number;
+  status: QuoteStatus;
+  validUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateQuoteRequest {
+  opportunityId: string;
+  totalValue: number;
+  validUntil?: string;
+}
 // ── SFA — Leads ───────────────────────────────────────────────────────────────
 
 export type LeadStage =

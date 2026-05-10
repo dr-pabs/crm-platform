@@ -56,6 +56,8 @@ function AppLayout() {
               <Route path="cases/:id" element={<CaseDetail />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="journeys" element={<Journeys />} />
+              <Route path="quotes" element={<Quotes />} />
+              <Route path="quotes/:id" element={<QuoteDetail />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="settings/prompt-templates" element={<PromptTemplates />} />
