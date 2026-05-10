@@ -20,6 +20,11 @@ public sealed class Campaign : BaseEntity
     public DateTime?       EndedAt     { get; private set; }
     public Guid            CreatedByUserId { get; private set; }
 
+    // Metrics
+    public int Impressions  { get; private set; }
+    public int Clicks        { get; private set; }
+    public int Conversions   { get; private set; }
+
     // Navigation
     public IReadOnlyList<Journey> Journeys { get; private set; } = [];
 
@@ -43,6 +48,9 @@ public sealed class Campaign : BaseEntity
             Channel         = channel,
             Status          = CampaignStatus.Draft,
             CreatedByUserId = createdByUserId,
+            Impressions     = 0,
+            Clicks          = 0,
+            Conversions     = 0,
             CreatedAt       = DateTime.UtcNow,
             UpdatedAt       = DateTime.UtcNow
         };
@@ -117,6 +125,15 @@ public sealed class Campaign : BaseEntity
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         Name        = name.Trim();
         Description = description.Trim();
+        UpdatedAt   = DateTime.UtcNow;
+    }
+
+    /// <summary>Increment campaign metrics from journey events.</summary>
+    public void IncrementMetrics(int impressions, int clicks, int conversions)
+    {
+        Impressions += impressions;
+        Clicks      += clicks;
+        Conversions += conversions;
         UpdatedAt   = DateTime.UtcNow;
     }
 }

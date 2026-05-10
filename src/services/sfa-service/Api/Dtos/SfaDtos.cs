@@ -107,7 +107,9 @@ public sealed record ContactResponse(
 public sealed record CreateAccountRequest(
     string      Name,
     string?     Industry,
-    AccountSize Size,
+    int?        EmployeeCount,
+    string?     Phone,
+    decimal?    AnnualRevenue,
     string?     BillingAddress,
     string?     Website);
 
@@ -115,7 +117,9 @@ public sealed record AccountResponse(
     Guid        Id,
     string      Name,
     string?     Industry,
-    string      Size,
+    int?        EmployeeCount,
+    string?     Phone,
+    decimal?    AnnualRevenue,
     string?     BillingAddress,
     string?     Website,
     DateTime    CreatedAt);

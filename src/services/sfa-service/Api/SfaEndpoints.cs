@@ -167,7 +167,7 @@ public static class SfaEndpoints
             CreateAccountHandler handler) =>
         {
             var result = await handler.HandleAsync(new CreateAccountCommand(
-                req.Name, req.Industry, req.Size, req.BillingAddress, req.Website));
+                req.Name, req.Industry, req.EmployeeCount, req.Phone, req.AnnualRevenue, req.BillingAddress, req.Website));
             return result.IsSuccess
                 ? Results.Created($"/accounts/{result.Value}", new CreatedResponse(result.Value))
                 : result.ToHttpResult();
@@ -232,7 +232,7 @@ public static class SfaEndpoints
         c.Id, c.FirstName, c.LastName, c.Email, c.Phone, c.AccountId, c.CreatedAt);
 
     private static AccountResponse ToAccountResponse(Account a) => new(
-        a.Id, a.Name, a.Industry, a.Size.ToString(), a.BillingAddress, a.Website, a.CreatedAt);
+        a.Id, a.Name, a.Industry, a.EmployeeCount, a.Phone, a.AnnualRevenue, a.BillingAddress, a.Website, a.CreatedAt);
 
     private static ActivityResponse ToActivityResponse(Activity a) => new(
         a.Id, a.ActivityType.ToString(), a.RelatedEntityId, a.RelatedEntityType,

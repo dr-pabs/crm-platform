@@ -2,14 +2,15 @@ using CrmPlatform.SfaService.Domain.Entities;
 using CrmPlatform.SfaService.Infrastructure.Data;
 using CrmPlatform.ServiceTemplate.Application;
 using CrmPlatform.ServiceTemplate.Infrastructure.MultiTenancy;
-using CrmPlatform.SfaService.Domain.Enums;
 
 namespace CrmPlatform.SfaService.Application.Accounts;
 
 public sealed record CreateAccountCommand(
     string      Name,
     string?     Industry,
-    AccountSize Size,
+    int?        EmployeeCount,
+    string?     Phone,
+    decimal?    AnnualRevenue,
     string?     BillingAddress,
     string?     Website);
 
@@ -24,9 +25,11 @@ public sealed class CreateAccountHandler(
             tenantContext.TenantId,
             cmd.Name,
             cmd.Industry,
-            cmd.Size);
-
-        account.Update(cmd.Name, cmd.Industry, cmd.Size, cmd.BillingAddress, cmd.Website);
+            cmd.EmployeeCount,
+            cmd.Phone,
+            cmd.AnnualRevenue,
+            cmd.BillingAddress,
+            cmd.Website);
 
         db.Accounts.Add(account);
         await db.SaveChangesAsync(ct);
