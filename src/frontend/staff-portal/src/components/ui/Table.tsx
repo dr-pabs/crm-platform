@@ -24,15 +24,15 @@ export function Table<T extends { id: string }>({
   onRowClick,
 }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-card">
+      <table className="min-w-full divide-y divide-border text-sm">
+        <thead className="bg-surface-muted">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={[
-                  'px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500',
+                  'px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-foreground-muted',
                   col.className ?? '',
                 ].join(' ')}
               >
@@ -50,7 +50,7 @@ export function Table<T extends { id: string }>({
             </tr>
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="py-12 text-center text-gray-400">
+              <td colSpan={columns.length} className="py-12 text-center text-foreground-muted">
                 {emptyMessage}
               </td>
             </tr>
@@ -61,7 +61,7 @@ export function Table<T extends { id: string }>({
                 onClick={onRowClick ? () => { onRowClick(row); } : undefined}
                 className={
                   onRowClick
-                    ? 'cursor-pointer hover:bg-gray-50 transition-colors'
+                    ? 'cursor-pointer hover:bg-surface-muted transition-colors'
                     : undefined
                 }
               >
@@ -70,7 +70,7 @@ export function Table<T extends { id: string }>({
                   return (
                     <td
                       key={col.key}
-                      className={['px-4 py-3 text-gray-700', col.className ?? ''].join(' ')}
+                      className={['px-4 py-3 text-foreground', col.className ?? ''].join(' ')}
                     >
                       {col.render ? col.render(row) : String(value ?? '')}
                     </td>

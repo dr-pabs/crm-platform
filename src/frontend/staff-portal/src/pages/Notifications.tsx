@@ -25,7 +25,7 @@ export function Notifications() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('notifications.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('notifications.title')}</h1>
         <Button
           variant="secondary"
           size="sm"
@@ -49,14 +49,14 @@ export function Notifications() {
             >
               <div className="flex-1 min-w-0">
                 {notification.subject && (
-                  <p className={`text-sm font-medium ${notification.readAt ? 'text-gray-700' : 'text-gray-900'}`}>
+                  <p className={`text-sm font-medium ${notification.readAt ? 'text-foreground' : 'text-foreground'}`}>
                     {notification.subject}
                   </p>
                 )}
-                <p className={`text-sm ${notification.readAt ? 'text-gray-500' : 'text-gray-700'}`}>
+                <p className={`text-sm ${notification.readAt ? 'text-foreground-muted' : 'text-foreground'}`}>
                   {notification.body}
                 </p>
-                <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+                <div className="mt-1 flex items-center gap-2 text-xs text-foreground-muted">
                   <Badge label={notification.channel} variant={channelVariant[notification.channel]} />
                   <span>{new Date(notification.createdAt).toLocaleString()}</span>
                 </div>
@@ -76,7 +76,7 @@ export function Notifications() {
           ))}
 
           {notifications.length === 0 && (
-            <p className="py-8 text-center text-sm text-gray-400">{t('notifications.noNotifications')}</p>
+            <p className="py-8 text-center text-sm text-foreground-muted">{t('notifications.noNotifications')}</p>
           )}
         </div>
       )}

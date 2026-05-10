@@ -95,7 +95,7 @@ export function Cases() {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('cases.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('cases.title')}</h1>
         <Button onClick={() => { setCreateOpen(true); }}>{t('cases.newCase')}</Button>
       </div>
 
@@ -142,7 +142,7 @@ export function Cases() {
         >
           <Input label={t('cases.subject')} required {...register('subject')} error={errors.subject?.message} />
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t('cases.priority')}</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t('cases.priority')}</label>
             <select {...register('priority')} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="Low">{t('cases.priorities.low')}</option>
               <option value="Medium">{t('cases.priorities.medium')}</option>
@@ -151,7 +151,7 @@ export function Cases() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t('cases.description')}</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t('cases.description')}</label>
             <textarea
               {...register('description')}
               rows={3}

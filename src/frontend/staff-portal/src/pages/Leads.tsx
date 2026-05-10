@@ -81,7 +81,7 @@ export function Leads() {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h1 className="text-2xl font-bold text-gray-900">{t('leads.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('leads.title')}</h1>
         <Button onClick={() => { setCreateOpen(true); }}>
           {t('leads.newLead')}
         </Button>
@@ -97,7 +97,7 @@ export function Leads() {
 
       {/* Pagination */}
       {data && data.totalPages > 1 && (
-        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-500">
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-foreground-muted">
           <span>
             {t('pagination.showing', {
               from: (params.page - 1) * params.pageSize + 1,

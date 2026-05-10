@@ -15,7 +15,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex flex-col gap-1">
         {label && (
-          <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
+          <label htmlFor={selectId} className="text-sm font-medium text-foreground">
             {label}
             {rest.required && <span className="ml-1 text-danger-500">*</span>}
           </label>
@@ -29,7 +29,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             error
               ? 'border-danger-500 focus:ring-danger-500'
               : 'border-border focus:border-primary-500 focus:ring-primary-500',
-            'disabled:cursor-not-allowed disabled:bg-gray-50',
+            'disabled:cursor-not-allowed disabled:bg-surface-muted',
             className,
           ].join(' ')}
           {...rest}
@@ -46,7 +46,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && <p className="text-xs text-danger-500">{error}</p>}
-        {!error && hint && <p className="text-xs text-gray-500">{hint}</p>}
+        {!error && hint && <p className="text-xs text-foreground-muted">{hint}</p>}
       </div>
     );
   },

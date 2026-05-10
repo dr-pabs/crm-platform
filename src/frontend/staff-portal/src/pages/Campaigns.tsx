@@ -90,7 +90,7 @@ export function Campaigns() {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('campaigns.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('campaigns.title')}</h1>
         <Button onClick={() => { setCreateOpen(true); }}>{t('campaigns.newCampaign')}</Button>
       </div>
 
@@ -137,8 +137,8 @@ export function Campaigns() {
           <Input label={t('campaigns.name')} required {...register('name')} error={errors.name?.message} />
           <Input label={t('campaigns.description')} {...register('description')} />
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t('campaigns.channel')}</label>
-            <select {...register('channel')} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
+            <label className="mb-1 block text-sm font-medium text-foreground">{t('campaigns.channel')}</label>
+            <select {...register('channel')} className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="">{t('common.select')}</option>
               <option value="Email">Email</option>
               <option value="Sms">SMS</option>

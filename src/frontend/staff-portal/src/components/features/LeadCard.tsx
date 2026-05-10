@@ -35,7 +35,7 @@ export function LeadCard({ lead }: LeadCardProps) {
       </div>
 
       {lead.company && (
-        <p className="text-sm text-gray-500">{lead.company}</p>
+        <p className="text-sm text-foreground-muted">{lead.company}</p>
       )}
 
       {lead.score !== undefined && (
@@ -46,7 +46,7 @@ export function LeadCard({ lead }: LeadCardProps) {
               style={{ width: `${lead.score}%` }}
             />
           </div>
-          <span className="text-xs text-gray-500">{lead.score}</span>
+          <span className="text-xs text-foreground-muted">{lead.score}</span>
         </div>
       )}
 
