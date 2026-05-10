@@ -49,7 +49,7 @@ public static class SfaEndpoints
             ITenantContext ctx) =>
         {
             var result = await handler.HandleAsync(new CreateLeadCommand(
-                req.Name, req.Email, req.Phone, req.Company, req.Source, ctx.UserId));
+                req.FirstName, req.LastName, req.JobTitle, req.Email, req.Phone, req.Company, req.Source, ctx.UserId));
 
             return result.IsSuccess
                 ? Results.Created($"/leads/{result.Value}", new CreatedResponse(result.Value))
@@ -62,7 +62,7 @@ public static class SfaEndpoints
             UpdateLeadHandler handler) =>
         {
             var result = await handler.HandleAsync(
-                new UpdateLeadCommand(id, req.Name, req.Email, req.Phone, req.Company));
+                new UpdateLeadCommand(id, req.FirstName, req.LastName, req.JobTitle, req.Email, req.Phone, req.Company));
             return result.IsSuccess ? Results.NoContent() : result.ToHttpResult();
         });
 
@@ -218,7 +218,7 @@ public static class SfaEndpoints
     // ─── Projection helpers ───────────────────────────────────────────────────
 
     private static LeadResponse ToLeadResponse(Lead l) => new(
-        l.Id, l.Name, l.Email, l.Phone, l.Company,
+        l.Id, l.FirstName, l.LastName, l.JobTitle, l.Email, l.Phone, l.Company,
         l.Source.ToString(), l.Status.ToString(), l.Score,
         l.AssignedToUserId, l.IsConverted, l.ConvertedToOpportunityId,
         l.CreatedAt, l.UpdatedAt);

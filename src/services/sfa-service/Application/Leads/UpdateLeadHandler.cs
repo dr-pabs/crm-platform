@@ -1,15 +1,17 @@
 using CrmPlatform.SfaService.Infrastructure.Data;
-using CrmPlatform.ServiceTemplate.Application;
+using CrmPlatform.ServiceTemplate.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmPlatform.SfaService.Application.Leads;
 
 public sealed record UpdateLeadCommand(
-    Guid    LeadId,
-    string  Name,
-    string  Email,
-    string? Phone,
-    string? Company);
+    Guid     LeadId,
+    string?  FirstName,
+    string?  LastName,
+    string?  JobTitle,
+    string?  Email,
+    string?  Phone,
+    string?  Company);
 
 public sealed class UpdateLeadHandler(SfaDbContext db)
 {
@@ -20,7 +22,7 @@ public sealed class UpdateLeadHandler(SfaDbContext db)
         if (lead is null)
             return Result.Fail<bool>("Lead not found.", ResultErrorCode.NotFound);
 
-        lead.Update(cmd.Name, cmd.Email, cmd.Phone, cmd.Company);
+        lead.Update(cmd.FirstName, cmd.LastName, cmd.JobTitle, cmd.Email, cmd.Phone, cmd.Company);
         await db.SaveChangesAsync(ct);
         return Result.Ok(true);
     }

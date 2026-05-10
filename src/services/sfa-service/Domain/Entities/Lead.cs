@@ -12,7 +12,9 @@ public sealed class Lead : BaseEntity
 {
     private Lead() { } // EF Core
 
-    public string     Name             { get; private set; } = string.Empty;
+    public string     FirstName        { get; private set; } = string.Empty;
+    public string     LastName         { get; private set; } = string.Empty;
+    public string?    JobTitle         { get; private set; }
     public string     Email            { get; private set; } = string.Empty;
     public string?    Phone            { get; private set; }
     public string?    Company          { get; private set; }
@@ -27,22 +29,29 @@ public sealed class Lead : BaseEntity
     // Activities are queried directly by RelatedEntityId + RelatedEntityType = "Lead"
     // No EF navigation — Activity is a polymorphic entity shared across Lead/Opportunity/Contact.
 
+    public string Name => $"{FirstName} {LastName}".Trim();
+
     public static Lead Create(
         Guid tenantId,
-        string name,
+        string firstName,
+        string lastName,
+        string? jobTitle,
         string email,
         string? phone,
         string? company,
         LeadSource source,
         Guid createdByUserId)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
         var lead = new Lead
         {
             TenantId  = tenantId,
-            Name      = name,
+            FirstName = firstName,
+            LastName  = lastName,
+            JobTitle  = jobTitle,
             Email     = email.ToLowerInvariant(),
             Phone     = phone,
             Company   = company,
@@ -96,10 +105,12 @@ public sealed class Lead : BaseEntity
         AddDomainEvent(new LeadConvertedEvent(Id, TenantId, opportunityId));
     }
 
-    public void Update(string? name, string? email, string? phone, string? company)
+    public void Update(string? firstName, string? lastName, string? jobTitle, string? email, string? phone, string? company)
     {
-        if (!string.IsNullOrWhiteSpace(name))    Name    = name;
-        if (!string.IsNullOrWhiteSpace(email))   Email   = email.ToLowerInvariant();
+        if (!string.IsNullOrWhiteSpace(firstName)) FirstName = firstName;
+        if (!string.IsNullOrWhiteSpace(lastName))  LastName  = lastName;
+        if (jobTitle != null) JobTitle = jobTitle;
+        if (!string.IsNullOrWhiteSpace(email))     Email     = email.ToLowerInvariant();
         if (phone   != null) Phone   = phone;
         if (company != null) Company = company;
     }
