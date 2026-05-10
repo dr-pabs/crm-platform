@@ -32,6 +32,28 @@ export interface UserProfile {
   avatarUrl?: string;
 }
 
+
+// ── SFA — Quotes ──────────────────────────────────────────────────────────────
+
+export type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Rejected";
+
+export interface Quote {
+  id: string;
+  tenantId: string;
+  opportunityId: string;
+  lineItemsJson: string;
+  totalValue: number;
+  status: QuoteStatus;
+  validUntil?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateQuoteRequest {
+  opportunityId: string;
+  totalValue: number;
+  validUntil?: string;
+}
 // ── SFA — Leads ───────────────────────────────────────────────────────────────
 
 export type LeadStage =
@@ -289,6 +311,12 @@ export interface AddCaseCommentRequest {
 
 export type CampaignStatus = 'Draft' | 'Active' | 'Paused' | 'Completed' | 'Archived';
 
+
+export interface CreateCampaignRequest {
+  name: string;
+  description?: string;
+  channel?: string;
+}
 export interface Campaign {
   id: string;
   tenantId: string;
@@ -325,6 +353,23 @@ export interface Journey {
   updatedAt: string;
 }
 
+
+// ── Activity Timeline ──────────────────────────────────────────────────────────
+
+export type ActivityType = "Call" | "Email" | "Meeting" | "Note";
+
+export interface Activity {
+  id: string;
+  tenantId: string;
+  activityType: ActivityType;
+  relatedEntityId: string;
+  relatedEntityType: string;
+  occurredAt: string;
+  notes?: string;
+  authorUserId: string;
+  authorName?: string;
+  createdAt: string;
+}
 // ── Notifications ─────────────────────────────────────────────────────────────
 
 export type NotificationChannel = 'InApp' | 'Email' | 'Sms' | 'Teams';

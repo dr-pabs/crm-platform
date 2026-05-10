@@ -40,7 +40,7 @@ function AppLayout() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto" role="main">
           <Suspense fallback={<PageSpinner />}>
             <Routes>
               <Route index element={<Dashboard />} />
@@ -56,6 +56,8 @@ function AppLayout() {
               <Route path="cases/:id" element={<CaseDetail />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="journeys" element={<Journeys />} />
+              <Route path="quotes" element={<Quotes />} />
+              <Route path="quotes/:id" element={<QuoteDetail />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="settings/prompt-templates" element={<PromptTemplates />} />

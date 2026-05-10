@@ -19,7 +19,7 @@ const variantClasses: Record<ButtonVariant, string> = {
   danger:
     'bg-danger-500 text-white hover:bg-danger-700 focus:ring-danger-500 border-transparent',
   ghost:
-    'bg-transparent text-foreground hover:bg-gray-100 focus:ring-primary-500 border-transparent',
+    'bg-transparent text-foreground hover:bg-surface-muted focus:ring-primary-500 border-transparent',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

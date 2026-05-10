@@ -1,3 +1,4 @@
+import { ActivityTimeline } from "../components/features/ActivityTimeline";
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -60,7 +61,7 @@ export function ContactDetail() {
 
       <div className="rounded-lg border border-border bg-white p-6">
         <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input label={t('contacts.firstName')} required {...register('firstName')} error={errors.firstName?.message} />
             <Input label={t('contacts.lastName')} required {...register('lastName')} error={errors.lastName?.message} />
           </div>
@@ -75,5 +76,7 @@ export function ContactDetail() {
         </form>
       </div>
     </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-6 mt-6"><h2 className="mb-4 text-lg font-semibold">Activity</h2><ActivityTimeline entityId={id ?? ""} entityType="Contact" /></div>
+
   );
 }

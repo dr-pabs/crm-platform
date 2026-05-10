@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../lib/apiClient';
-import type { Campaign, PagedResult, PaginationParams } from '../types';
+import type { Campaign, CreateCampaignRequest, PagedResult, PaginationParams } from '../types';
 
 const CAMPAIGNS_KEY = 'campaigns' as const;
 
@@ -24,6 +24,20 @@ export function useCampaign(id: string) {
       return response.data;
     },
     enabled: Boolean(id),
+  });
+}
+
+
+export function useCreateCampaign() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (req: CreateCampaignRequest) => {
+      const { data } = await apiClient.post<Campaign>("/marketing/campaigns", req);
+      return data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: [CAMPAIGNS_KEY] });
+    },
   });
 }
 

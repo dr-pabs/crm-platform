@@ -1,3 +1,4 @@
+import { ActivityTimeline } from "../components/features/ActivityTimeline";
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
@@ -78,5 +79,7 @@ export function AccountDetail() {
         </form>
       </div>
     </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-6 mt-6"><h2 className="mb-4 text-lg font-semibold">Activity</h2><ActivityTimeline entityId={id ?? ""} entityType="Account" /></div>
+
   );
 }
