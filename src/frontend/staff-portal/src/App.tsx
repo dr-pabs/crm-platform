@@ -40,7 +40,7 @@ function AppLayout() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBar />
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto" role="main">
           <Suspense fallback={<PageSpinner />}>
             <Routes>
               <Route index element={<Dashboard />} />

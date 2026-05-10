@@ -49,7 +49,7 @@ export function TopBar() {
     <header className="flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm">
       {/* Left: toggle sidebar */}
       <button
-        onClick={toggleSidebar}
+        onClick={toggleSidebar} aria-label="Toggle sidebar"
         className="rounded p-2 text-gray-500 hover:bg-gray-100"
         aria-label="Toggle sidebar"
       >
@@ -74,7 +74,7 @@ export function TopBar() {
           <span className="hidden text-sm font-medium text-gray-700 sm:block">{displayName}</span>
           {isAuthConfigured && (
             <button
-              onClick={handleSignOut}
+              onClick={handleSignOut} aria-label="Sign out"
               className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-100"
             >
               {t('auth.signOut')}
