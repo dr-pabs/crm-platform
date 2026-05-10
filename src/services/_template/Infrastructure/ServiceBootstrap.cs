@@ -50,9 +50,10 @@ public static class ServiceBootstrap
         if (!string.IsNullOrEmpty(sqlConnectionString))
             healthBuilder.AddSqlServer(sqlConnectionString, name: "sql", tags: ["ready"]);
 
-        healthBuilder.AddAzureServiceBusQueue(
+        healthBuilder.AddAzureServiceBusTopic(
             sbConnectionString,
-            queueName: serviceName,   // services don't use queues but this validates connectivity
+            topicName: "crm.health",
+            subscriptionName: serviceName,
             name: "servicebus",
             tags: ["ready"]);
 
