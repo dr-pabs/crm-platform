@@ -325,6 +325,23 @@ export interface Journey {
   updatedAt: string;
 }
 
+
+// ── Activity Timeline ──────────────────────────────────────────────────────────
+
+export type ActivityType = "Call" | "Email" | "Meeting" | "Note";
+
+export interface Activity {
+  id: string;
+  tenantId: string;
+  activityType: ActivityType;
+  relatedEntityId: string;
+  relatedEntityType: string;
+  occurredAt: string;
+  notes?: string;
+  authorUserId: string;
+  authorName?: string;
+  createdAt: string;
+}
 // ── Notifications ─────────────────────────────────────────────────────────────
 
 export type NotificationChannel = 'InApp' | 'Email' | 'Sms' | 'Teams';
