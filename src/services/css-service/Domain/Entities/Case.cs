@@ -6,7 +6,7 @@ namespace CrmPlatform.CssService.Domain.Entities;
 
 public sealed class Case : BaseEntity
 {
-    public string      Title                     { get; private set; } = string.Empty;
+    public string      Subject                  { get; private set; } = string.Empty;
     public string      Description               { get; private set; } = string.Empty;
     public CaseStatus  Status                    { get; private set; }
     public CasePriority Priority                 { get; private set; }
@@ -41,7 +41,7 @@ public sealed class Case : BaseEntity
         {
             Id          = Guid.NewGuid(),
             TenantId    = tenantId,
-            Title       = title.Trim(),
+            Subject    = title.Trim(),
             Description = description.Trim(),
             Status      = CaseStatus.New,
             Priority    = priority,
