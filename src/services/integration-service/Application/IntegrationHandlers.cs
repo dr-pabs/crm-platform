@@ -15,13 +15,13 @@ public sealed class OAuthOptions
 {
     public string SalesforceClientId     { get; set; } = string.Empty;
     public string SalesforceClientSecret { get; set; } = string.Empty;  // from KV at startup
-    public string SalesforceTokenUrl     { get; set; } = "https://login.salesforce.com/services/oauth2/token";
-    public string SalesforceAuthUrl      { get; set; } = "https://login.salesforce.com/services/oauth2/authorize";
+    public string SalesforceTokenUrl     { get; set; } = string.Empty;
+    public string SalesforceAuthUrl      { get; set; } = string.Empty;
 
     public string HubSpotClientId        { get; set; } = string.Empty;
     public string HubSpotClientSecret    { get; set; } = string.Empty;  // from KV at startup
-    public string HubSpotTokenUrl        { get; set; } = "https://api.hubapi.com/oauth/v1/token";
-    public string HubSpotAuthUrl         { get; set; } = "https://app.hubspot.com/oauth/authorize";
+    public string HubSpotTokenUrl        { get; set; } = string.Empty;
+    public string HubSpotAuthUrl         { get; set; } = string.Empty;
 
     public string CallbackBaseUrl        { get; set; } = string.Empty;  // e.g. https://api.crm.example.com
     public string StaffPortalBaseUrl     { get; set; } = string.Empty;  // redirect after connect
