@@ -48,12 +48,34 @@ jobs:
           dotnet test src/services/${{ matrix.service }} \
             --no-build --configuration Release \
             --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage/${{ matrix.service }}
+            --results-directory ./coverage/${{ matrix.service }} \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Coverage gate (${{ env.COVERAGE_THRESHOLD }}% minimum)
         run: |
-          # TODO: add coverage threshold enforcement (reportgenerator)
-          echo "Coverage gate to be wired up"
+          reportgenerator \
+            -reports:"./coverage/${{ matrix.service }}/**/coverage.cobertura.xml" \
+            -targetdir:"./coverage-report/${{ matrix.service }}" \
+            -reporttypes:"TextSummary;Cobertura"
+
+          # Extract line coverage and fail if below threshold
+          LINE_COVERAGE=$(grep -oP 'Line coverage: \K[\d.]+' \
+            ./coverage-report/${{ matrix.service }}/Summary.txt || echo "0")
+          echo "Line coverage for ${{ matrix.service }}: ${LINE_COVERAGE}%"
+          if (( $(echo "$LINE_COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "::error::Coverage ${LINE_COVERAGE}% is below the ${{ env.COVERAGE_THRESHOLD }}% threshold"
+            exit 1
+          fi
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.service }}
+          path: ./coverage-report/${{ matrix.service }}/
 
   security-scan:
     name: Security Scans

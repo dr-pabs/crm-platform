@@ -35,7 +35,7 @@ jobs:
           IMAGE_TAG=sha-${{ github.sha }}
           for service in sfa-service css-service marketing-service analytics-service \
             ai-orchestration-service identity-service integration-service \
-            notification-service platform-admin-service; do
+            notification-service platform-admin-service staff-bff; do
             echo "Building ${service}"
             docker build -t ${{ env.ACR_NAME }}.azurecr.io/${service}:${IMAGE_TAG} \
               src/services/${service}
@@ -48,7 +48,7 @@ jobs:
           # List existing Defender tasks for each image. In dev we surface findings without blocking.
           for service in sfa-service css-service marketing-service analytics-service \
             ai-orchestration-service identity-service integration-service \
-            notification-service platform-admin-service; do
+            notification-service platform-admin-service staff-bff; do
             az security task list \
               --query "[?contains(resourceDetails.id, '${service}') && contains(resourceDetails.id, '${IMAGE_TAG}')].{name:name,state:state}" \
               --output table || true
