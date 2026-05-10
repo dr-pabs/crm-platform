@@ -64,7 +64,7 @@ export function AiDraftComposer({
       </Button>
 
       {draft && (
-        <div className="rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-700 whitespace-pre-line">
+        <div className="rounded-md border border-border bg-white p-3 text-sm text-foreground whitespace-pre-line">
           {draft}
           <div className="mt-3 flex justify-end">
             <Button size="sm" variant="secondary" onClick={handleInsert}>

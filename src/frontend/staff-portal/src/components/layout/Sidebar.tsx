@@ -124,7 +124,7 @@ export function Sidebar() {
   return (
     <aside
       className={[
-        'flex flex-col bg-gray-900 text-gray-100 transition-all duration-200',
+        'flex flex-col bg-primary-950 text-gray-100 transition-all duration-200',
         sidebarOpen ? 'w-60' : 'w-16',
       ].join(' ')}
     >
@@ -148,8 +148,8 @@ export function Sidebar() {
               [
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary-700 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white',
+                  ? 'bg-accent-600 text-white'
+                  : 'text-primary-200 hover:bg-primary-900 hover:text-white',
               ].join(' ')
             }
           >

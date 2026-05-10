@@ -56,7 +56,7 @@ export function CaseTimeline({ caseItem, comments }: CaseTimelineProps) {
       {(caseItem.aiSummary ?? caseItem.sentiment) && (
         <div className="rounded-lg border border-primary-200 bg-primary-50 p-4">
           {caseItem.aiSummary && (
-            <p className="text-sm text-gray-700">{caseItem.aiSummary}</p>
+            <p className="text-sm text-foreground">{caseItem.aiSummary}</p>
           )}
           {caseItem.sentiment && (
             <div className="mt-2">
@@ -75,14 +75,14 @@ export function CaseTimeline({ caseItem, comments }: CaseTimelineProps) {
               'rounded-lg border p-4',
               comment.isInternal
                 ? 'border-warning-200 bg-warning-50'
-                : 'border-gray-200 bg-white',
+                : 'border-border bg-white',
             ].join(' ')}
           >
             <div className="mb-1 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-800">{comment.authorName}</span>
-              <span className="text-xs text-gray-400">{formatDate(comment.createdAt)}</span>
+              <span className="text-xs text-foreground-muted">{formatDate(comment.createdAt)}</span>
             </div>
-            <p className="text-sm text-gray-700 whitespace-pre-line">{comment.body}</p>
+            <p className="text-sm text-foreground whitespace-pre-line">{comment.body}</p>
             {comment.isInternal && (
               <span className="mt-1 text-xs italic text-warning-700">{t('cases.timeline')} — internal</span>
             )}
@@ -90,7 +90,7 @@ export function CaseTimeline({ caseItem, comments }: CaseTimelineProps) {
         ))}
 
         {comments.length === 0 && (
-          <p className="text-sm text-gray-400">{t('common.noResults')}</p>
+          <p className="text-sm text-foreground-muted">{t('common.noResults')}</p>
         )}
       </div>
 

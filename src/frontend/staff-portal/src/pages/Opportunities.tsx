@@ -17,16 +17,16 @@ export function Opportunities() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">{t('opportunities.title')}</h1>
+      <div className="flex items-center justify-between border-b border-border bg-white px-6 py-4">
+        <h1 className="text-2xl font-bold text-foreground">{t('opportunities.title')}</h1>
         <div className="flex items-center gap-3">
-          <div className="flex rounded-md border border-gray-200 overflow-hidden">
+          <div className="flex rounded-md border border-border overflow-hidden">
             <button
               onClick={() => { setView('kanban'); }}
               className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                 view === 'kanban'
                   ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  : 'bg-white text-gray-600 hover:bg-surface-muted'
               }`}
             >
               {t('opportunities.kanban')}
@@ -36,7 +36,7 @@ export function Opportunities() {
               className={`px-3 py-1.5 text-sm font-medium transition-colors ${
                 view === 'list'
                   ? 'bg-primary-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+                  : 'bg-white text-gray-600 hover:bg-surface-muted'
               }`}
             >
               {t('common.list')}
@@ -57,9 +57,9 @@ export function Opportunities() {
           />
         ) : (
           <div className="p-6">
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
+            <div className="overflow-x-auto rounded-lg border border-border bg-white">
               <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50">
+                <thead className="bg-surface-muted">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">{t('opportunities.title_singular')}</th>
                     <th className="px-4 py-3 text-left font-medium text-gray-600">{t('opportunities.stage')}</th>
@@ -68,10 +68,10 @@ export function Opportunities() {
                     <th className="px-4 py-3 text-left font-medium text-gray-600">{t('opportunities.closeDate')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-border">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                      <td colSpan={5} className="px-4 py-8 text-center text-foreground-muted">
                         {t('common.loading')}
                       </td>
                     </tr>
@@ -79,11 +79,11 @@ export function Opportunities() {
                     <tr
                       key={opp.id}
                       onClick={() => { void navigate(`/opportunities/${opp.id}`); }}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-surface-muted"
                     >
-                      <td className="px-4 py-3 font-medium text-gray-900">{opp.title}</td>
+                      <td className="px-4 py-3 font-medium text-foreground">{opp.title}</td>
                       <td className="px-4 py-3 text-gray-600">{opp.stage}</td>
-                      <td className="px-4 py-3 text-right text-gray-900">
+                      <td className="px-4 py-3 text-right text-foreground">
                         {opp.amount !== undefined
                           ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(opp.amount)
                           : '—'

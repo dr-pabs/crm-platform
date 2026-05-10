@@ -49,22 +49,22 @@ export function AccountDetail() {
     return <div className="flex h-64 items-center justify-center"><Spinner size="lg" /></div>;
   }
   if (!account) {
-    return <div className="p-6"><p className="text-gray-500">{t('errors.notFound')}</p></div>;
+    return <div className="p-6"><p className="text-foreground-muted">{t('errors.notFound')}</p></div>;
   }
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6 flex items-center gap-4">
-        <button onClick={() => { void navigate('/accounts'); }} className="text-sm text-gray-500 hover:text-gray-700">
+        <button onClick={() => { void navigate('/accounts'); }} className="text-sm text-foreground-muted hover:text-foreground">
           ← {t('accounts.title')}
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{account.name}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{account.name}</h1>
         {account.industry && (
-          <span className="text-sm text-gray-500">{account.industry}</span>
+          <span className="text-sm text-foreground-muted">{account.industry}</span>
         )}
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-border bg-white p-6">
         <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} className="space-y-4">
           <Input label={t('accounts.name')} required {...register('name')} error={errors.name?.message} />
           <Input label={t('accounts.industry')} {...register('industry')} />

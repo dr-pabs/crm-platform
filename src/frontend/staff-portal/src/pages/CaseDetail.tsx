@@ -23,16 +23,16 @@ export function CaseDetail() {
     return <div className="flex h-64 items-center justify-center"><Spinner size="lg" /></div>;
   }
   if (!caseItem) {
-    return <div className="p-6"><p className="text-gray-500">{t('errors.notFound')}</p></div>;
+    return <div className="p-6"><p className="text-foreground-muted">{t('errors.notFound')}</p></div>;
   }
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-6 flex items-center gap-4">
-        <button onClick={() => { void navigate('/cases'); }} className="text-sm text-gray-500 hover:text-gray-700">
+        <button onClick={() => { void navigate('/cases'); }} className="text-sm text-foreground-muted hover:text-foreground">
           {`\u2190 ${t('cases.title')}`}
         </button>
-        <h1 className="text-2xl font-bold text-gray-900 flex-1">{caseItem.subject}</h1>
+        <h1 className="text-2xl font-bold text-foreground flex-1">{caseItem.subject}</h1>
         <Badge label={caseItem.status} variant={caseItem.status === 'Closed' ? 'success' : 'info'} />
         <Badge label={caseItem.priority} variant={priorityVariant[caseItem.priority]} />
       </div>
@@ -50,38 +50,38 @@ export function CaseDetail() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="mb-3 text-sm font-semibold text-gray-700">{t('cases.details')}</h3>
+          <div className="rounded-lg border border-border bg-white p-4">
+            <h3 className="mb-3 text-sm font-semibold text-foreground">{t('cases.details')}</h3>
             <dl className="space-y-2 text-sm">
               <div>
-                <dt className="text-gray-500">{t('cases.status')}</dt>
+                <dt className="text-foreground-muted">{t('cases.status')}</dt>
                 <dd className="font-medium">{caseItem.status}</dd>
               </div>
               <div>
-                <dt className="text-gray-500">{t('cases.priority')}</dt>
+                <dt className="text-foreground-muted">{t('cases.priority')}</dt>
                 <dd className="font-medium">{caseItem.priority}</dd>
               </div>
               {caseItem.sentiment && (
                 <div>
-                  <dt className="text-gray-500">{t('cases.sentiment')}</dt>
+                  <dt className="text-foreground-muted">{t('cases.sentiment')}</dt>
                   <dd className="font-medium">{caseItem.sentiment}</dd>
                 </div>
               )}
               {caseItem.slaDueAt && (
                 <div>
-                  <dt className="text-gray-500">{t('cases.slaDeadline')}</dt>
+                  <dt className="text-foreground-muted">{t('cases.slaDeadline')}</dt>
                   <dd className="font-medium">{new Date(caseItem.slaDueAt).toLocaleString()}</dd>
                 </div>
               )}
               <div>
-                <dt className="text-gray-500">{t('common.created')}</dt>
+                <dt className="text-foreground-muted">{t('common.created')}</dt>
                 <dd>{new Date(caseItem.createdAt).toLocaleDateString()}</dd>
               </div>
             </dl>
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
-            <h3 className="mb-3 text-sm font-semibold text-gray-700">{t('ai.draftReply')}</h3>
+          <div className="rounded-lg border border-border bg-white p-4">
+            <h3 className="mb-3 text-sm font-semibold text-foreground">{t('ai.draftReply')}</h3>
             <AiDraftComposer
               entityType="case"
               entityId={caseItem.id}

@@ -68,7 +68,7 @@ export function Contacts() {
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">{t('contacts.title')}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('contacts.title')}</h1>
         <Button onClick={() => { setCreateOpen(true); }}>
           {t('contacts.newContact')}
         </Button>

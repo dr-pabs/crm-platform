@@ -56,7 +56,7 @@ export function LeadDetail() {
   if (!lead) {
     return (
       <div className="p-6">
-        <p className="text-gray-500">{t('errors.notFound')}</p>
+        <p className="text-foreground-muted">{t('errors.notFound')}</p>
       </div>
     );
   }
@@ -66,16 +66,16 @@ export function LeadDetail() {
       <div className="mb-6 flex items-center gap-4">
         <button
           onClick={() => { void navigate('/leads'); }}
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-foreground-muted hover:text-foreground"
         >
           ← {t('leads.title')}
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           {lead.firstName} {lead.lastName}
         </h1>
         <Badge label={lead.stage} variant="info" />
         {lead.score !== undefined && (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-foreground-muted">
             {t('leads.score')}: {lead.score}
           </span>
         )}
@@ -83,7 +83,7 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-2 space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="rounded-lg border border-border bg-white p-6">
             <h2 className="mb-4 text-lg font-semibold">{t('common.details')}</h2>
             <form
               onSubmit={(e) => { void handleSubmit(onSubmit)(e); }}
@@ -126,7 +126,7 @@ export function LeadDetail() {
           </div>
 
           {lead.nextBestActions && lead.nextBestActions.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <div className="rounded-lg border border-border bg-white p-6">
               <h2 className="mb-4 text-lg font-semibold">{t('ai.nextBestActions')}</h2>
               <ul className="space-y-2">
                 {lead.nextBestActions.map((action, i) => (
@@ -141,7 +141,7 @@ export function LeadDetail() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <div className="rounded-lg border border-border bg-white p-6">
             <h2 className="mb-4 text-lg font-semibold">{t('ai.draftMessage')}</h2>
             <AiDraftComposer
               entityType="lead"

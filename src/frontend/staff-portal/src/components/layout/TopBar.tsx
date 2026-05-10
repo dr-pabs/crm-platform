@@ -50,7 +50,7 @@ export function TopBar() {
       {/* Left: toggle sidebar */}
       <button
         onClick={toggleSidebar}
-        className="rounded p-2 text-gray-500 hover:bg-gray-100"
+        className="rounded p-2 text-gray-500 hover:bg-surface-muted"
         aria-label="Toggle sidebar"
       >
         <MenuIcon />
@@ -60,7 +60,7 @@ export function TopBar() {
       <div className="flex items-center gap-4">
         <Link
           to="/notifications"
-          className="rounded p-2 text-gray-500 hover:bg-gray-100"
+          className="rounded p-2 text-gray-500 hover:bg-surface-muted"
           aria-label={t('nav.notifications')}
         >
           <BellIcon count={unreadCount} />
@@ -75,7 +75,7 @@ export function TopBar() {
           {isAuthConfigured && (
             <button
               onClick={handleSignOut}
-              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-100"
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-surface-muted"
             >
               {t('auth.signOut')}
             </button>

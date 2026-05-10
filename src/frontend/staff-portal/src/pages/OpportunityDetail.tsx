@@ -56,24 +56,24 @@ export function OpportunityDetail() {
     return <div className="flex h-64 items-center justify-center"><Spinner size="lg" /></div>;
   }
   if (!opp) {
-    return <div className="p-6"><p className="text-gray-500">{t('errors.notFound')}</p></div>;
+    return <div className="p-6"><p className="text-foreground-muted">{t('errors.notFound')}</p></div>;
   }
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6 flex items-center gap-4">
-        <button onClick={() => { void navigate('/opportunities'); }} className="text-sm text-gray-500 hover:text-gray-700">
+        <button onClick={() => { void navigate('/opportunities'); }} className="text-sm text-foreground-muted hover:text-foreground">
           {`\u2190 ${t('opportunities.title')}`}
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">{opp.name}</h1>
+        <h1 className="text-2xl font-bold text-foreground">{opp.name}</h1>
         <Badge label={opp.stage} variant={opp.stage === 'ClosedWon' ? 'success' : opp.stage === 'ClosedLost' ? 'danger' : 'info'} />
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
+      <div className="rounded-lg border border-border bg-white p-6">
         <form onSubmit={(e) => { void handleSubmit(onSubmit)(e); }} className="space-y-4">
           <Input label={t('opportunities.name')} required {...register('name')} error={errors.name?.message} />
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">{t('opportunities.stage')}</label>
+            <label className="mb-1 block text-sm font-medium text-foreground">{t('opportunities.stage')}</label>
             <select {...register('stage')} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
               {STAGES.map((s) => (
                 <option key={s} value={s}>{s}</option>

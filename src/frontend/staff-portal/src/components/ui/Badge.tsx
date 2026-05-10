@@ -6,7 +6,7 @@ export interface BadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: 'bg-gray-100 text-gray-700',
+  default: 'bg-gray-100 text-foreground',
   success: 'bg-success-50 text-success-700',
   warning: 'bg-warning-50 text-warning-700',
   danger: 'bg-danger-50 text-danger-700',

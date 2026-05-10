@@ -9,9 +9,9 @@ function MetricCard({ metric }: { metric: AnalyticsMetric }) {
   const deltaPrefix = isPositive ? '+' : '';
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-      <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{metric.metricName}</p>
-      <p className="mt-2 text-3xl font-bold text-gray-900">
+    <div className="rounded-lg border border-border bg-white p-5 shadow-sm">
+      <p className="text-xs font-medium uppercase tracking-wide text-foreground-muted">{metric.metricName}</p>
+      <p className="mt-2 text-3xl font-bold text-foreground">
         {typeof metric.value === 'number' ? metric.value.toLocaleString() : metric.value}
       </p>
       {metric.delta !== undefined && (
@@ -19,7 +19,7 @@ function MetricCard({ metric }: { metric: AnalyticsMetric }) {
           {deltaPrefix}{metric.delta} vs previous period
         </p>
       )}
-      <p className="mt-1 text-xs text-gray-400">{metric.period}</p>
+      <p className="mt-1 text-xs text-foreground-muted">{metric.period}</p>
     </div>
   );
 }
@@ -31,8 +31,8 @@ export function Analytics() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('analytics.title')}</h1>
-        <p className="mt-1 text-sm text-gray-500">{t('analytics.subtitle')}</p>
+        <h1 className="text-2xl font-bold text-foreground">{t('analytics.title')}</h1>
+        <p className="mt-1 text-sm text-foreground-muted">{t('analytics.subtitle')}</p>
       </div>
 
       {isLoading && (

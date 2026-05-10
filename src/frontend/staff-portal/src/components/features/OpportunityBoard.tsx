@@ -30,7 +30,7 @@ export function OpportunityBoard({ opportunities, loading, onCardClick }: Opport
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <span className="text-sm text-gray-400">{t('common.loading')}</span>
+        <span className="text-sm text-foreground-muted">{t('common.loading')}</span>
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function OpportunityBoard({ opportunities, loading, onCardClick }: Opport
       {byStage.map(({ stage, items }) => (
         <div key={stage} className="min-w-[240px] flex-shrink-0">
           <div className="mb-2 flex items-center justify-between rounded-t-md bg-gray-100 px-3 py-2">
-            <span className="text-sm font-semibold text-gray-700">
+            <span className="text-sm font-semibold text-foreground">
               {t(`opportunities.stages.${stage.charAt(0).toLowerCase() + stage.slice(1)}`)}
             </span>
             <Badge label={String(items.length)} variant="default" />
@@ -66,7 +66,7 @@ export function OpportunityBoard({ opportunities, loading, onCardClick }: Opport
               >
                 <p className="text-sm font-medium text-gray-900 line-clamp-2">{opp.name}</p>
                 {opp.accountName && (
-                  <p className="mt-0.5 text-xs text-gray-500">{opp.accountName}</p>
+                  <p className="mt-0.5 text-xs text-foreground-muted">{opp.accountName}</p>
                 )}
                 <div className="mt-2 flex items-center justify-between">
                   {opp.amount !== undefined && (
@@ -75,14 +75,14 @@ export function OpportunityBoard({ opportunities, loading, onCardClick }: Opport
                     </span>
                   )}
                   {opp.probability !== undefined && (
-                    <span className="text-xs text-gray-400">{opp.probability}%</span>
+                    <span className="text-xs text-foreground-muted">{opp.probability}%</span>
                   )}
                 </div>
               </div>
             ))}
 
             {items.length === 0 && (
-              <div className="rounded-md border border-dashed p-4 text-center text-xs text-gray-400">
+              <div className="rounded-md border border-dashed p-4 text-center text-xs text-foreground-muted">
                 {t('common.noResults')}
               </div>
             )}

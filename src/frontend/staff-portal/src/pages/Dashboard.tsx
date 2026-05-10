@@ -12,7 +12,7 @@ function StatCard({ title, value, to }: { title: string; value: number | string;
   return (
     <Link
       to={to}
-      className="block rounded-lg border bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="block rounded-lg border bg-white p-6 shadow-card hover:shadow-card-hover transition-shadow"
     >
       <p className="text-sm font-medium text-gray-500">{title}</p>
       <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
@@ -86,10 +86,10 @@ export function Dashboard() {
                 <Link
                   key={lead.id}
                   to={`/leads/${lead.id}`}
-                  className="flex items-center justify-between rounded-md border bg-white px-4 py-3 hover:bg-gray-50"
+                  className="flex items-center justify-between rounded-md border bg-white px-4 py-3 hover:bg-surface-muted"
                 >
                   <span className="text-sm font-medium">{lead.firstName} {lead.lastName}</span>
-                  <span className="text-xs text-gray-400">{lead.stage}</span>
+                  <span className="text-xs text-foreground-muted">{lead.stage}</span>
                 </Link>
               ))}
             </div>
@@ -108,10 +108,10 @@ export function Dashboard() {
                 <Link
                   key={c.id}
                   to={`/cases/${c.id}`}
-                  className="flex items-center justify-between rounded-md border bg-white px-4 py-3 hover:bg-gray-50"
+                  className="flex items-center justify-between rounded-md border bg-white px-4 py-3 hover:bg-surface-muted"
                 >
                   <span className="text-sm font-medium">{c.subject}</span>
-                  <span className="text-xs text-gray-400">{c.status}</span>
+                  <span className="text-xs text-foreground-muted">{c.status}</span>
                 </Link>
               ))}
             </div>
