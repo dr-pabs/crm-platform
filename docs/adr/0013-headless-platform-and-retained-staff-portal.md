@@ -21,7 +21,7 @@ The original architecture assumed:
 The target product has changed:
 
 - the **staff portal remains** as the only first-party UI
-- the **customer portal is retired**
+- the **customer portal is retained**
 - customer/self-service capability must be delivered through **headless APIs, events, and integrations**
 - third-party/system consumers become a first-class concern rather than a side channel
 
@@ -48,14 +48,14 @@ This minimises short-term disruption, but it preserves duplicated product surfac
 ### Option B — Remove all first-party UIs and go fully headless
 This is clean architecturally, but it discards the staff portal that remains important for internal CRM workflows and operational efficiency.
 
-### Option C — Keep the staff portal, retire the customer portal, and make customer/integration capability headless
+### Option C — Keep the staff portal, retain the customer portal, and make customer/integration capability headless
 This retains the high-value internal UI while moving all external/customer-facing capability behind stable APIs and integration surfaces. It matches the requested target and the current codebase direction.
 
 ---
 
 ## Decision
 
-**Adopt Option C. The staff portal remains the sole first-party UI. The customer portal is retired. Customer/self-service and external consumption move to headless APIs, events, and integrations exposed through APIM-governed products.**
+**Adopt Option C. The staff portal remains the sole first-party UI. The customer portal is retained alongside the staff portal. Customer/self-service and external consumption move to headless APIs, events, and integrations exposed through APIM-governed products.**
 
 Additionally:
 
@@ -160,7 +160,7 @@ src/services/
   ...                  → domain services and headless API surfaces
 ```
 
-`src/frontend/customer-portal` is treated as a retired surface and should be removed from active CI, infra, and operational assumptions.
+`src/frontend/customer-portal` remains in active CI, infra, and operational scope alongside the staff portal.
 
 ### ADR impact
 
