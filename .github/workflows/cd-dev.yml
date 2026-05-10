@@ -52,6 +52,21 @@ jobs:
           template: infra/platform/main.bicep
           parameters: infra/platform/parameters/dev.bicepparam imageTag=sha-${{ github.sha }}
 
+      - name: Apply EF Core migrations
+        run: |
+          dotnet tool install --global dotnet-ef --ignore-failed-sources || true
+          SQL_FQDN=$(az deployment sub show \
+            --name apiManagement \
+            --query properties.outputs.sqlServerFqdn.value -o tsv 2>/dev/null || echo "")
+          if [[ -z "$SQL_FQDN" ]]; then
+            echo "WARNING: Could not retrieve SQL FQDN from deployment outputs — skipping migration step"
+            exit 0
+          fi
+          CONNECTION_STRING="Server=$SQL_FQDN;Database=CrmPlatform;Authentication=Active Directory Default;Encrypt=True;" \
+            ./scripts/apply-migrations.sh
+        env:
+          DOTNET_ROOT: /usr/share/dotnet
+
       - name: Smoke tests
         run: echo "TODO: add smoke test script"
 
