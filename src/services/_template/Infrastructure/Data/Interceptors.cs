@@ -62,8 +62,8 @@ public sealed class TenantSessionContextInterceptor(ITenantContext tenantContext
 
         // Prepend SESSION_CONTEXT to the batch so RLS can filter.
         // The stored proc sp_SetTenantContext wraps this safely.
-        command.CommandText =
-            $"EXEC sp_SetTenantContext @TenantId = '{tenantContext.TenantId}';\n"
+        var tenantParam = command.CreateParameter(); tenantParam.ParameterName = "@TenantId"; tenantParam.Value = tenantContext.TenantId; command.Parameters.Insert(0, tenantParam); command.CommandText =
+            $"EXEC sp_SetTenantContext @TenantId = @TenantId;\n"
             + command.CommandText;
     }
 }

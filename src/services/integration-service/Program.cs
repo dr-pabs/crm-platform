@@ -93,6 +93,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// ─── Database migration ───────────────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<IntegrationDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 // ─── Middleware pipeline ──────────────────────────────────────────────────────
 app.UseProblemDetails();
 app.UseCrmService(); // health + auth + TenantContextMiddleware

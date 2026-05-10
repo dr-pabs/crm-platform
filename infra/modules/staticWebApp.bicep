@@ -1,3 +1,4 @@
+param backendApiUrl string
 // infra/modules/staticWebApp.bicep
 // Azure Static Web Apps — staff portal and customer portal.
 // ADR 0007: React SPA served from SWA; API calls routed through APIM.
