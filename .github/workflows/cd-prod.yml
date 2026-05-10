@@ -126,7 +126,7 @@ jobs:
       - name: Post-deploy health checks
         run: |
           APIM_URL="https://crm-prod-apim.azure-api.net"
-          for service_path in sfa css marketing analytics identity notification platform; do
+          for service_path in sfa css marketing analytics identity notification platform staff-bff; do
             echo "Checking ${service_path} health..."
             HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
               "${APIM_URL}/api/v1/${service_path}/health/ready" || echo "000")
