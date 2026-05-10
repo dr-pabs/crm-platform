@@ -9,6 +9,10 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  ACR_NAME: crmprodacr
+  ACA_RESOURCE_GROUP: crm-prod-rg
+
 jobs:
   deploy-prod:
     name: Deploy to Production
@@ -25,8 +29,24 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Verify image SHA matches scanned image
-        run: echo "TODO: verify image SHA against Defender scan results"
+      - name: Verify image SHA is clean in Defender for Containers
+        run: |
+          IMAGE_TAG=${{ github.ref_name }}
+          # Retrieve the vulnerability assessment for the image from Microsoft Defender.
+          # Fails (exit 1) if any Critical severity CVE is unpatched.
+          az security assessment list \
+            --query "[?contains(resourceDetails.id, '${IMAGE_TAG}') && properties.status.code=='Unhealthy'].{name:name,severity:metadata.severity}" \
+            --output json | \
+          python3 -c "
+          import json, sys, os
+          image_tag = os.environ.get('IMAGE_TAG', '')
+          assessments = json.load(sys.stdin)
+          critical = [a for a in assessments if a.get('severity','').lower() == 'critical']
+          if critical:
+              print(f'::error::Found {len(critical)} critical CVEs in image {image_tag} — blocking deployment')
+              sys.exit(1)
+          print(f'No critical CVEs found in image {image_tag}')
+          "
 
       - name: Bicep what-if (displayed in approval)
         uses: azure/arm-deploy@v2
@@ -45,19 +65,74 @@ jobs:
           template: infra/platform/main.bicep
           parameters: infra/platform/parameters/prod.bicepparam imageTag=${{ github.ref_name }}
 
-      - name: Blue/green traffic shift — 10%
+      - name: Blue/green — activate new revision at 10% traffic
         run: |
-          # TODO: implement traffic shifting via Container Apps revision management
-          echo "Shifting 10% traffic to new revision"
-          ./scripts/check-error-rate.sh --threshold 1.0 --duration 5m
+          IMAGE_TAG=${{ github.ref_name }}
+          for service in sfa-service css-service marketing-service analytics-service \
+            ai-orchestration-service identity-service integration-service \
+            notification-service platform-admin-service; do
+            echo "Activating new revision for ${service} at 10% traffic"
+            az containerapp revision list \
+              --name "${service}" \
+              --resource-group "${{ env.ACA_RESOURCE_GROUP }}" \
+              --query "sort_by([].{name:name,active:properties.active,createdAt:properties.createdTime},&createdAt)[-1].name" \
+              --output tsv | xargs -I{} \
+            az containerapp ingress traffic set \
+              --name "${service}" \
+              --resource-group "${{ env.ACA_RESOURCE_GROUP }}" \
+              --revision-weight {}=10 latest=0
+          done
 
-      - name: Blue/green traffic shift — 50%
+      - name: Monitor error rate at 10% (5 min)
+        env:
+          AZURE_APP_INSIGHTS_APP_ID: ${{ secrets.APP_INSIGHTS_APP_ID }}
+          AZURE_APP_INSIGHTS_API_KEY: ${{ secrets.APP_INSIGHTS_API_KEY }}
+        run: ./scripts/check-error-rate.sh --threshold 1.0 --duration 5m
+
+      - name: Blue/green — increase to 50% traffic
         run: |
-          echo "Shifting 50% traffic to new revision"
-          ./scripts/check-error-rate.sh --threshold 1.0 --duration 10m
+          for service in sfa-service css-service marketing-service analytics-service \
+            ai-orchestration-service identity-service integration-service \
+            notification-service platform-admin-service; do
+            az containerapp revision list \
+              --name "${service}" \
+              --resource-group "${{ env.ACA_RESOURCE_GROUP }}" \
+              --query "sort_by([].{name:name,active:properties.active,createdAt:properties.createdTime},&createdAt)[-1].name" \
+              --output tsv | xargs -I{} \
+            az containerapp ingress traffic set \
+              --name "${service}" \
+              --resource-group "${{ env.ACA_RESOURCE_GROUP }}" \
+              --revision-weight {}=50 latest=0
+          done
 
-      - name: Blue/green traffic shift — 100%
-        run: echo "Shifting 100% traffic to new revision"
+      - name: Monitor error rate at 50% (10 min)
+        env:
+          AZURE_APP_INSIGHTS_APP_ID: ${{ secrets.APP_INSIGHTS_APP_ID }}
+          AZURE_APP_INSIGHTS_API_KEY: ${{ secrets.APP_INSIGHTS_API_KEY }}
+        run: ./scripts/check-error-rate.sh --threshold 1.0 --duration 10m
 
-      - name: Post-deploy integration tests
-        run: echo "TODO: add post-deploy integration test script"
+      - name: Blue/green — promote to 100% traffic
+        run: |
+          for service in sfa-service css-service marketing-service analytics-service \
+            ai-orchestration-service identity-service integration-service \
+            notification-service platform-admin-service; do
+            az containerapp ingress traffic set \
+              --name "${service}" \
+              --resource-group "${{ env.ACA_RESOURCE_GROUP }}" \
+              --label latest
+          done
+          echo "All services promoted to 100% new revision"
+
+      - name: Post-deploy health checks
+        run: |
+          APIM_URL="https://crm-prod-apim.azure-api.net"
+          for service_path in sfa css marketing analytics identity notification platform; do
+            echo "Checking ${service_path} health..."
+            HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
+              "${APIM_URL}/api/v1/${service_path}/health/ready" || echo "000")
+            if [ "${HTTP_STATUS}" != "200" ]; then
+              echo "::error::Health check failed for ${service_path}: HTTP ${HTTP_STATUS}"
+              exit 1
+            fi
+          done
+          echo "All service health checks passed"
