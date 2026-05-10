@@ -178,6 +178,27 @@ public static class AiEndpoints
         .WithName("DeletePromptTemplate")
         .Produces(StatusCodes.Status204NoContent);
 
+        
+        sync.MapPost("/email-draft/stream", async (
+            [FromBody] EmailDraftRequest req,
+            SyncAiHandler                handler,
+            HttpContext                   http,
+            CancellationToken            ct) =>
+        {
+            http.Response.ContentType = "text/event-stream";
+            http.Response.Headers.Append("Cache-Control", "no-cache");
+            var result = await handler.DraftEmailAsync(req, ct);
+            await http.Response.WriteAsync($"data: {System.Text.Json.JsonSerializer.Serialize(new { content = result.Content })}
+
+", ct);
+            await http.Response.WriteAsync("data: [DONE]
+
+", ct);
+            await http.Response.CompleteAsync();
+        })
+        .WithName("DraftEmailStream")
+        .WithSummary("Generate an AI email draft with SSE streaming");
+
         return app;
     }
 }
