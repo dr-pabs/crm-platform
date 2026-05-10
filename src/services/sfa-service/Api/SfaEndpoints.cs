@@ -212,6 +212,74 @@ public static class SfaEndpoints
             return Results.Ok(items.Select(ToActivityResponse));
         });
 
+
+        var quotes = app.MapGroup("/quotes").RequireAuthorization();
+
+        quotes.MapGet("/", async (
+            SfaDbContext db,
+            Guid? opportunityId,
+            int page     = 1,
+            int pageSize = 25) =>
+        {
+            pageSize = Math.Min(pageSize, 100);
+            var query = db.Quotes
+                .Where(q => !opportunityId.HasValue || q.OpportunityId == opportunityId.Value)
+                .OrderByDescending(q => q.CreatedAt);
+            var total = await query.CountAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            return Results.Ok(new PagedQuotesResponse(
+                items.Select(ToQuoteResponse).ToList(), total, page, pageSize));
+        });
+
+        quotes.MapGet("/{id:guid}", async (Guid id, SfaDbContext db) =>
+        {
+            var quote = await db.Quotes.FirstOrDefaultAsync(q => q.Id == id);
+            return quote is null ? Results.NotFound() : Results.Ok(ToQuoteResponse(quote));
+        });
+
+        quotes.MapPost("/", async (
+            CreateQuoteRequest req,
+            SfaDbContext db,
+            ITenantContext ctx) =>
+        {
+            var quote = Quote.Create(ctx.TenantId, req.OpportunityId, req.TotalValue, req.ValidUntil);
+            db.Quotes.Add(quote);
+            await db.SaveChangesAsync();
+            return Results.Created($"/quotes/{quote.Id}", new CreatedResponse(quote.Id));
+        });
+
+        quotes.MapPost("/{id:guid}/send", async (Guid id, SfaDbContext db) =>
+        {
+            var quote = await db.Quotes
+                .Include(q => q.Opportunity)
+                .FirstOrDefaultAsync(q => q.Id == id);
+            if (quote is null) return Results.NotFound();
+            try { quote.Send(quote.Opportunity!.Stage); }
+            catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); }
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
+        quotes.MapPost("/{id:guid}/accept", async (Guid id, SfaDbContext db) =>
+        {
+            var quote = await db.Quotes.FirstOrDefaultAsync(q => q.Id == id);
+            if (quote is null) return Results.NotFound();
+            try { quote.Accept(); }
+            catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); }
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
+        quotes.MapPost("/{id:guid}/reject", async (Guid id, SfaDbContext db) =>
+        {
+            var quote = await db.Quotes.FirstOrDefaultAsync(q => q.Id == id);
+            if (quote is null) return Results.NotFound();
+            try { quote.Reject(); }
+            catch (InvalidOperationException ex) { return Results.Conflict(new { error = ex.Message }); }
+            await db.SaveChangesAsync();
+            return Results.NoContent();
+        });
+
         return app;
     }
 
