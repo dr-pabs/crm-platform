@@ -1,3 +1,4 @@
+using CrmPlatform.MarketingService.Domain.Enums;
 using CrmPlatform.MarketingService.Domain.Events;
 using CrmPlatform.ServiceTemplate.Domain;
 
@@ -7,15 +8,16 @@ namespace CrmPlatform.MarketingService.Domain.Entities;
 /// An automated multi-step journey tied to a Campaign.
 /// The journey engine (Durable Function) drives enrollments through the steps.
 /// A Journey is immutable once published — create a new version instead.
+/// Status: Draft → Active → Paused/Completed/Archived.
 /// </summary>
 public sealed class Journey : BaseEntity
 {
-    public Guid    CampaignId   { get; private set; }
-    public string  Name         { get; private set; } = string.Empty;
-    public string  Description  { get; private set; } = string.Empty;
-    public bool    IsPublished  { get; private set; }
-    public int     StepCount    { get; private set; }
-    public Guid    CreatedByUserId { get; private set; }
+    public Guid          CampaignId      { get; private set; }
+    public string        Name            { get; private set; } = string.Empty;
+    public string        Description     { get; private set; } = string.Empty;
+    public JourneyStatus Status          { get; private set; } = JourneyStatus.Draft;
+    public int           StepCount       { get; private set; }
+    public Guid          CreatedByUserId { get; private set; }
 
     /// <summary>
     /// JSON-serialised step definitions loaded by the Durable Function orchestrator.
@@ -45,7 +47,7 @@ public sealed class Journey : BaseEntity
             CampaignId      = campaignId,
             Name            = name.Trim(),
             Description     = description.Trim(),
-            IsPublished     = false,
+            Status          = JourneyStatus.Draft,
             StepCount       = 0,
             StepsJson       = "[]",
             CreatedByUserId = createdByUserId,
@@ -53,6 +55,8 @@ public sealed class Journey : BaseEntity
             UpdatedAt       = DateTime.UtcNow
         };
     }
+
+    public bool IsPublished => Status != JourneyStatus.Draft;
 
     /// <summary>Set the journey steps definition (JSON). Only allowed before publishing.</summary>
     public void SetSteps(string stepsJson, int stepCount)
@@ -79,9 +83,45 @@ public sealed class Journey : BaseEntity
         if (StepCount < 1)
             throw new InvalidOperationException("Journey must have at least one step before publishing.");
 
-        IsPublished = true;
-        UpdatedAt   = DateTime.UtcNow;
+        Status    = JourneyStatus.Active;
+        UpdatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new JourneyPublishedEvent(Id, TenantId, CampaignId, StepCount));
+    }
+
+    /// <summary>Pause a running journey — no new enrollments.</summary>
+    public void Pause()
+    {
+        if (Status != JourneyStatus.Active)
+            throw new InvalidOperationException($"Cannot pause a journey in status {Status}.");
+        Status    = JourneyStatus.Paused;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Resume a paused journey.</summary>
+    public void Resume()
+    {
+        if (Status != JourneyStatus.Paused)
+            throw new InvalidOperationException($"Cannot resume a journey in status {Status}.");
+        Status    = JourneyStatus.Active;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Mark the journey as completed (all enrollments finished).</summary>
+    public void Complete()
+    {
+        if (Status is not (JourneyStatus.Active or JourneyStatus.Paused))
+            throw new InvalidOperationException($"Cannot complete a journey in status {Status}.");
+        Status    = JourneyStatus.Completed;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Archive a completed journey.</summary>
+    public void Archive()
+    {
+        if (Status != JourneyStatus.Completed)
+            throw new InvalidOperationException("Only completed journeys can be archived.");
+        Status    = JourneyStatus.Archived;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
