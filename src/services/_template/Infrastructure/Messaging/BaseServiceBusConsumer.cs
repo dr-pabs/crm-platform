@@ -71,10 +71,10 @@ public abstract class BaseServiceBusConsumer<TMessage>(
         });
 
         // ─── Idempotency check ────────────────────────────────────────────
-        if (await idempotencyStore.HasBeenProcessedAsync(messageId, args.CancellationToken))
+        if (await idempotencyStore.HasBeenProcessedAsync(messageId, args.CancellationToken).ConfigureAwait(false))
         {
             logger.LogInformation("Duplicate message {MessageId} — completing without processing", messageId);
-            await args.CompleteMessageAsync(args.Message, args.CancellationToken);
+            await args.CompleteMessageAsync(args.Message, args.CancellationToken).ConfigureAwait(false);
             return;
         }
 
@@ -87,8 +87,8 @@ public abstract class BaseServiceBusConsumer<TMessage>(
 
             if (handled)
             {
-                await idempotencyStore.MarkProcessedAsync(messageId, args.CancellationToken);
-                await args.CompleteMessageAsync(args.Message, args.CancellationToken);
+                await idempotencyStore.MarkProcessedAsync(messageId, args.CancellationToken).ConfigureAwait(false);
+                await args.CompleteMessageAsync(args.Message, args.CancellationToken).ConfigureAwait(false);
                 logger.LogInformation("Processed message {MessageId}", messageId);
             }
             else
