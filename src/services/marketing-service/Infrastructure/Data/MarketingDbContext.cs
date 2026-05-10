@@ -38,6 +38,9 @@ file sealed class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
         b.Property(e => e.Name).IsRequired().HasMaxLength(256);
         b.Property(e => e.Description).HasMaxLength(2000);
         b.Property(e => e.Channel).HasConversion<string>().IsRequired();
+            b.Property(e => e.Impressions).IsRequired();
+            b.Property(e => e.Clicks).IsRequired();
+            b.Property(e => e.Conversions).IsRequired();
         b.Property(e => e.Status).HasConversion<string>().IsRequired();
 
         b.HasIndex(e => new { e.TenantId, e.Status });

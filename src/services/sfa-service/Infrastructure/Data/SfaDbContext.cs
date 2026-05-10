@@ -84,7 +84,7 @@ file sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         b.HasKey(e => e.Id);
         b.Property(e => e.Name).IsRequired().HasMaxLength(256);
         b.Property(e => e.Industry).HasMaxLength(128);
-        b.Property(e => e.Size).HasMaxLength(64);
+        b.Property(e => e.EmployeeCount);
         b.Property(e => e.BillingAddress).HasMaxLength(512);
 
         b.HasIndex(e => new { e.TenantId, e.Name });
