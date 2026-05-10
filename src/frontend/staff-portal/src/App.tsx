@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { MsalAuthenticationTemplate } from '@azure/msal-react';
 import { InteractionType } from '@azure/msal-browser';
-import { loginRequest } from './lib/authConfig';
+import { isAuthConfigured, loginRequest } from './lib/authConfig';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopBar } from './components/layout/TopBar';
 import { Spinner } from './components/ui';
@@ -70,6 +70,14 @@ function AppLayout() {
 }
 
 export function App() {
+  if (!isAuthConfigured) {
+    return (
+      <Routes>
+        <Route path="/*" element={<AppLayout />} />
+      </Routes>
+    );
+  }
+
   return (
     <MsalAuthenticationTemplate
       interactionType={InteractionType.Redirect}

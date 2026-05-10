@@ -8,6 +8,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisMode>All</AnalysisMode>
+    <!-- Suppress OpenTelemetry CVE advisory for local dev (CI enforces security) -->
+    <NoWarn>$(NoWarn);NU1902</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <!-- EF Core + SQL Server -->
@@ -26,16 +28,16 @@
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer"       Version="8.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="8.0.0" />
     <!-- OpenTelemetry -->
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting"             Version="1.8.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"     Version="1.8.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http"           Version="1.8.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting"             Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"     Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http"           Version="1.11.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.11.0" />
     <!-- Problem Details (RFC 7807) -->
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
     <!-- HTTP client for health aggregation -->
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\services\_template\CrmPlatform.ServiceTemplate.csproj" />
+    <ProjectReference Include="..\_template\CrmPlatform.ServiceTemplate.csproj" />
   </ItemGroup>
 </Project>

@@ -100,6 +100,12 @@ This re-runs `05-seed-dev-data.sql` only (tenants and users are not re-seeded �
 make dev
 ```
 
+If port `3000` is already in use, start the staff portal on a different port:
+
+```bash
+make dev STAFF_PORT=3002
+```
+
 ### Start only the service you're working on
 
 ```bash
@@ -210,6 +216,9 @@ cd src/frontend/customer-portal && npm install
 ```bash
 # Staff portal — http://localhost:3000
 cd src/frontend/staff-portal && npm run dev
+
+# Staff portal on a different port
+cd src/frontend/staff-portal && STAFF_PORT=3002 npm run dev
 
 # Customer portal — http://localhost:3001
 cd src/frontend/customer-portal && npm run dev

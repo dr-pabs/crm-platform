@@ -1,12 +1,18 @@
 import { Configuration, LogLevel } from '@azure/msal-browser';
 
-const clientId = import.meta.env.VITE_AZURE_CLIENT_ID;
-const tenantId = import.meta.env.VITE_AZURE_TENANT_ID;
-const authority = `${import.meta.env.VITE_AZURE_AUTHORITY}${tenantId}`;
+const configuredClientId = import.meta.env.VITE_AZURE_CLIENT_ID;
+const configuredTenantId = import.meta.env.VITE_AZURE_TENANT_ID;
+const authorityBase = import.meta.env.VITE_AZURE_AUTHORITY || 'https://login.microsoftonline.com/';
 
-if (!clientId || !tenantId) {
+export const isAuthConfigured = Boolean(configuredClientId && configuredTenantId);
+
+if (!isAuthConfigured && !import.meta.env.DEV) {
   throw new Error('VITE_AZURE_CLIENT_ID and VITE_AZURE_TENANT_ID must be set in environment');
 }
+
+const clientId = configuredClientId || '00000000-0000-0000-0000-000000000000';
+const tenantId = configuredTenantId || 'common';
+const authority = `${authorityBase}${tenantId}`;
 
 export const msalConfig: Configuration = {
   auth: {
@@ -45,7 +51,7 @@ export const msalConfig: Configuration = {
 };
 
 /** Scopes required to call the CRM API. */
-export const apiScopes: string[] = [`api://${clientId}/crm.access`];
+export const apiScopes: string[] = isAuthConfigured ? [`api://${clientId}/crm.access`] : [];
 
 /** Login request — used for interactive login. */
 export const loginRequest = {

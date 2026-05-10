@@ -3,6 +3,7 @@ import { useMsal } from '@azure/msal-react';
 import { useUiStore } from '../../stores/uiStore';
 import { useUnreadNotificationCount } from '../../hooks/useNotifications';
 import { Link } from 'react-router-dom';
+import { isAuthConfigured } from '../../lib/authConfig';
 
 function MenuIcon() {
   return (
@@ -34,9 +35,13 @@ export function TopBar() {
   const { accounts, instance } = useMsal();
   const { data: unreadCount } = useUnreadNotificationCount();
 
-  const displayName = accounts[0]?.name ?? accounts[0]?.username ?? '';
+  const displayName = accounts[0]?.name ?? accounts[0]?.username ?? 'Dev User';
 
   const handleSignOut = () => {
+    if (!isAuthConfigured) {
+      return;
+    }
+
     void instance.logoutRedirect();
   };
 
@@ -67,12 +72,14 @@ export function TopBar() {
             {displayName.charAt(0).toUpperCase()}
           </div>
           <span className="hidden text-sm font-medium text-gray-700 sm:block">{displayName}</span>
-          <button
-            onClick={handleSignOut}
-            className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-100"
-          >
-            {t('auth.signOut')}
-          </button>
+          {isAuthConfigured && (
+            <button
+              onClick={handleSignOut}
+              className="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-100"
+            >
+              {t('auth.signOut')}
+            </button>
+          )}
         </div>
       </div>
     </header>
