@@ -1,5 +1,5 @@
-using Azure;
 using Azure.AI.Inference;
+using Azure.Identity;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -28,7 +28,7 @@ public interface IClaudeClient
 
 /// <summary>
 /// Wraps Azure.AI.Inference ChatCompletionsClient to invoke Claude models via
-/// Azure AI Services (Model-as-a-Service endpoint).
+/// Azure AI Services using Managed Identity (DefaultAzureCredential).
 /// Prompt resolution: tenant custom (DB) → platform hard-coded default.
 /// </summary>
 public sealed class ClaudeClient(
@@ -37,10 +37,20 @@ public sealed class ClaudeClient(
     ILogger<ClaudeClient>      logger)
     : IClaudeClient
 {
+    private static readonly IHandlebars _handlebars = CreateSafeHandlebars();
+
+    private static IHandlebars CreateSafeHandlebars()
+    {
+        var hbs = Handlebars.Create();
+        hbs.Configuration.TextEncoder = new HtmlEncoder();
+        // No custom helpers registered — tenant templates are sandboxed
+        return hbs;
+    }
+
     private ChatCompletionsClient BuildClient() =>
         new(
             new Uri(config["Azure:AI:Endpoint"]!),
-            new AzureKeyCredential(config["Azure:AI:ApiKey"]!));
+            new DefaultAzureCredential());
 
     public async Task<ClaudeResponse> CompleteAsync(
         Guid              tenantId,
@@ -52,13 +62,14 @@ public sealed class ClaudeClient(
         var (systemPrompt, userTemplate) = await promptResolver.ResolveAsync(
             tenantId, capabilityType, useCase, ct);
 
-        // Render Handlebars template
-        var hbsTemplate = Handlebars.Compile(userTemplate);
+        var hbsTemplate = _handlebars.Compile(userTemplate);
         var userMessage  = hbsTemplate(templateVars);
 
+        // Model per capability from config, with env-specific fallback
         var modelName = config[$"Azure:AI:Models:{capabilityType}"]
                      ?? config["Azure:AI:Models:Default"]
-                     ?? "claude-3-7-sonnet-20250219";
+                     ?? throw new InvalidOperationException(
+                         $"Azure:AI:Models:{capabilityType} and Azure:AI:Models:Default are not configured");
 
         var options = new ChatCompletionsOptions
         {
@@ -119,7 +130,6 @@ public sealed class PromptResolver(
         if (template is not null)
             return (template.SystemPrompt, template.UserPromptTemplate);
 
-        // Fall back to hard-coded platform defaults
         return PromptDefaults.Get(capabilityType, useCase);
     }
 }
@@ -191,7 +201,6 @@ public static class PromptDefaults
         if (_defaults.TryGetValue((capabilityType, useCase), out var prompt))
             return prompt;
 
-        // Generic fallback
         return (
             "You are a helpful AI assistant integrated into a CRM platform.",
             "Process the following input and return a useful, structured response:\n{{input}}");
