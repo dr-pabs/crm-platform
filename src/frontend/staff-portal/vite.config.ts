@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
+const staffPort = Number(process.env.STAFF_PORT ?? process.env.PORT ?? 3000);
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -11,12 +13,49 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    host: '0.0.0.0',
+    port: staffPort,
     proxy: {
-      // Proxy API calls in dev to avoid CORS issues
-      '/api': {
-        target: 'http://localhost:5000',
+      // Route each API area to its local microservice in development.
+      '/api/sfa': {
+        target: 'http://localhost:5010',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/sfa/, ''),
+      },
+      '/api/css': {
+        target: 'http://localhost:5020',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/css/, ''),
+      },
+      '/api/marketing': {
+        target: 'http://localhost:5030',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/marketing/, ''),
+      },
+      '/api/analytics': {
+        target: 'http://localhost:5040',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/api/ai': {
+        target: 'http://localhost:5050',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/api/notifications': {
+        target: 'http://localhost:5070',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/api/notification-templates': {
+        target: 'http://localhost:5070',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+      '/api/notification-preferences': {
+        target: 'http://localhost:5070',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

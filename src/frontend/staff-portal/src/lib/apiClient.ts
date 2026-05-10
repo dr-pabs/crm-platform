@@ -1,11 +1,11 @@
 import axios, { type InternalAxiosRequestConfig, type AxiosError } from 'axios';
 import { PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig, apiScopes } from './authConfig';
+import { msalConfig, apiScopes, isAuthConfigured } from './authConfig';
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 30_000,
   headers: {
     'Content-Type': 'application/json',
@@ -14,6 +14,10 @@ const apiClient = axios.create({
 
 /** Attach Bearer token and X-Tenant-Id header to every outbound request. */
 apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  if (!isAuthConfigured) {
+    return config;
+  }
+
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length === 0) {
     return config;
@@ -44,7 +48,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError<ApiProblemDetails>) => {
     const status = error.response?.status;
 
-    if (status === 401) {
+    if (status === 401 && isAuthConfigured && apiScopes.length > 0) {
       // Force re-login if token is rejected
       void msalInstance.loginRedirect({ scopes: apiScopes });
     }

@@ -24,7 +24,9 @@ MARKETING_PORT  := 5030
 ANALYTICS_PORT  := 5040
 AI_PORT         := 5050
 BFF_PORT        := 5060
+NOTIFICATION_PORT := 5070
 AUTH_STUB_PORT  := 5100
+STAFF_PORT      ?= 3000
 
 # Local SQL credentials (local dev only — never used in Azure)
 SQL_SA_PASSWORD := Dev_Password_123!
@@ -42,7 +44,7 @@ dev-infra: ## Start infrastructure only (SQL, Service Bus, Azurite, Mailpit)
 	@echo "🐳 Starting local infrastructure..."
 	docker compose up -d
 	@echo "⏳ Waiting for SQL Server to be healthy..."
-	@until docker exec crm-sql /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$(SQL_SA_PASSWORD)" -Q "SELECT 1" > /dev/null 2>&1; do sleep 2; done
+	@until docker exec crm-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$(SQL_SA_PASSWORD)" -Q "SELECT 1" -C > /dev/null 2>&1; do sleep 2; done
 	@echo "✅ Infrastructure ready."
 	@echo "   SQL Server:        localhost:$(SQL_PORT)"
 	@echo "   Service Bus AMQP:  localhost:5672"
@@ -56,17 +58,25 @@ dev-infra: ## Start infrastructure only (SQL, Service Bus, Azurite, Mailpit)
 
 dev: dev-infra migrate ## Start full local stack (infrastructure + all services)
 	@echo "🚀 Starting all services..."
-	dotnet run --project src/services/identity-service --no-launch-profile &
-	dotnet run --project src/services/platform-admin-service --no-launch-profile &
-	dotnet run --project src/services/sfa-service --no-launch-profile &
-	dotnet run --project src/services/css-service --no-launch-profile &
-	dotnet run --project src/services/marketing-service --no-launch-profile &
-	dotnet run --project src/services/analytics-service --no-launch-profile &
-	dotnet run --project src/services/ai-orchestration-service --no-launch-profile &
-	dotnet run --project src/services/notification-service --no-launch-profile &
-	dotnet run --project src/services/_local/auth-stub --no-launch-profile &
-	@echo "🌐 Starting frontend..."
-	cd src/frontend && pnpm dev &
+	dotnet run --project src/services/identity-service --no-launch-profile --verbosity quiet --urls http://localhost:$(IDENTITY_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/platform-admin-service --no-launch-profile --verbosity quiet --urls http://localhost:$(PLATFORM_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/sfa-service --no-launch-profile --verbosity quiet --urls http://localhost:$(SFA_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/css-service --no-launch-profile --verbosity quiet --urls http://localhost:$(CSS_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/marketing-service --no-launch-profile --verbosity quiet --urls http://localhost:$(MARKETING_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/analytics-service --no-launch-profile --verbosity quiet --urls http://localhost:$(ANALYTICS_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/ai-orchestration-service --no-launch-profile --verbosity quiet --urls http://localhost:$(AI_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/notification-service --no-launch-profile --verbosity quiet --urls http://localhost:$(NOTIFICATION_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/_local/auth-stub --no-launch-profile --verbosity quiet --urls http://localhost:$(AUTH_STUB_PORT) >/dev/null 2>&1 &
+	@if [ -f src/frontend/staff-portal/package.json ]; then \
+		echo "🌐 Starting frontend..."; \
+		if [ ! -d src/frontend/staff-portal/node_modules ]; then \
+			echo "📦 Installing staff portal dependencies..."; \
+			cd src/frontend/staff-portal && npm install; \
+		fi; \
+		cd src/frontend/staff-portal && npm run dev -- --host 0.0.0.0 --port $(STAFF_PORT) >/dev/null 2>&1 & \
+	else \
+		echo "⚠️  Staff portal not initialized (no package.json found)"; \
+	fi
 	@echo ""
 	@echo "✅ Full stack started. Service ports:"
 	@echo "   identity-service:          http://localhost:$(IDENTITY_PORT)"
@@ -76,30 +86,30 @@ dev: dev-infra migrate ## Start full local stack (infrastructure + all services)
 	@echo "   marketing-service:         http://localhost:$(MARKETING_PORT)"
 	@echo "   analytics-service:         http://localhost:$(ANALYTICS_PORT)"
 	@echo "   ai-orchestration-service:  http://localhost:$(AI_PORT)"
+	@echo "   notification-service:      http://localhost:$(NOTIFICATION_PORT)"
 	@echo "   auth-stub:                 http://localhost:$(AUTH_STUB_PORT)"
-	@echo "   Staff Portal:              http://localhost:3000"
-	@echo "   Customer Portal:           http://localhost:3001"
+	@echo "   Staff Portal:              http://localhost:$(STAFF_PORT)"
 
 dev-sfa: dev-infra migrate ## Start infrastructure + identity + SFA service (for SFA feature work)
 	@echo "🚀 Starting identity-service and sfa-service..."
-	dotnet run --project src/services/identity-service --no-launch-profile &
-	dotnet run --project src/services/_local/auth-stub --no-launch-profile &
-	dotnet run --project src/services/sfa-service --no-launch-profile &
+	dotnet run --project src/services/identity-service --no-launch-profile --verbosity quiet --urls http://localhost:$(IDENTITY_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/_local/auth-stub --no-launch-profile --verbosity quiet --urls http://localhost:$(AUTH_STUB_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/sfa-service --no-launch-profile --urls http://localhost:$(SFA_PORT) &
 	@echo "✅ SFA stack ready at http://localhost:$(SFA_PORT)"
 	@echo "   Get a token: ./scripts/local/get-dev-token.sh --tenant TenantA --role SalesRep"
 
 dev-css: dev-infra migrate ## Start infrastructure + identity + CS&S service (for CSS feature work)
 	@echo "🚀 Starting identity-service and css-service..."
-	dotnet run --project src/services/identity-service --no-launch-profile &
-	dotnet run --project src/services/_local/auth-stub --no-launch-profile &
-	dotnet run --project src/services/css-service --no-launch-profile &
+	dotnet run --project src/services/identity-service --no-launch-profile --verbosity quiet --urls http://localhost:$(IDENTITY_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/_local/auth-stub --no-launch-profile --verbosity quiet --urls http://localhost:$(AUTH_STUB_PORT) >/dev/null 2>&1 &
+	dotnet run --project src/services/css-service --no-launch-profile --urls http://localhost:$(CSS_PORT) &
 	@echo "✅ CSS stack ready at http://localhost:$(CSS_PORT)"
 
 dev-marketing: dev-infra migrate ## Start infrastructure + identity + marketing service (for Marketing feature work)
 	@echo "🚀 Starting identity-service and marketing-service..."
-	dotnet run --project src/services/identity-service --no-launch-profile &
-	dotnet run --project src/services/_local/auth-stub --no-launch-profile &
-	dotnet run --project src/services/marketing-service --no-launch-profile &
+	dotnet run --project src/services/identity-service --no-launch-profile --urls http://localhost:$(IDENTITY_PORT) &
+	dotnet run --project src/services/_local/auth-stub --no-launch-profile --urls http://localhost:$(AUTH_STUB_PORT) &
+	dotnet run --project src/services/marketing-service --no-launch-profile --urls http://localhost:$(MARKETING_PORT) &
 	@echo "✅ Marketing stack ready at http://localhost:$(MARKETING_PORT)"
 
 # ============================================================
@@ -111,7 +121,7 @@ migrate: ## Apply EF Core migrations to local SQL for all services
 	@for service in identity-service platform-admin-service sfa-service css-service marketing-service analytics-service ai-orchestration-service notification-service integration-service; do \
 		if [ -d "src/services/$$service" ]; then \
 			echo "  Migrating $$service..."; \
-			dotnet ef database update --project src/services/$$service 2>/dev/null || echo "  ⚠️  No migrations yet for $$service (expected during Phase 0)"; \
+			dotnet ef database update --project src/services/$$service --verbosity quiet >/dev/null 2>&1 || echo "  ⚠️  No migrations yet for $$service (expected during Phase 0)"; \
 		fi; \
 	done
 	@echo "✅ Migrations complete."
@@ -127,7 +137,7 @@ reset: ## Tear down and rebuild local environment from scratch
 	docker compose down -v
 	docker compose up -d
 	@echo "⏳ Waiting for SQL Server..."
-	@until docker exec crm-sql /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$(SQL_SA_PASSWORD)" -Q "SELECT 1" > /dev/null 2>&1; do sleep 2; done
+	dotnet build CrmPlatform.sln	@until docker exec crm-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$(SQL_SA_PASSWORD)" -Q "SELECT 1" -C > /dev/null 2>&1; do sleep 2; done
 	$(MAKE) migrate
 	$(MAKE) seed
 	@echo "✅ Environment reset complete."

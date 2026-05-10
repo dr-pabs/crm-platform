@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <!-- Shared kernel -->
-    <ProjectReference Include="..\..\shared\CrmPlatform.ServiceDefaults\CrmPlatform.ServiceDefaults.csproj" />
+    <ProjectReference Include="../_template/CrmPlatform.ServiceTemplate.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,11 +30,11 @@
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.0" />
 
     <!-- Azure AI Inference (Claude via MAAS) -->
-    <PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.6" />
+    <PackageReference Include="Azure.AI.Inference" Version="1.0.0-beta.5" />
 
     <!-- Azure Communication Services -->
-    <PackageReference Include="Azure.Communication.Sms" Version="1.1.0" />
-    <PackageReference Include="Azure.Communication.CallingServer" Version="1.0.0-beta.4" />
+    <PackageReference Include="Azure.Communication.Sms" Version="1.1.0-beta.3" />
+    <PackageReference Include="Azure.Communication.CallingServer" Version="1.0.0-beta.3" />
 
     <!-- Prompt templating -->
     <PackageReference Include="Handlebars.Net" Version="2.1.6" />

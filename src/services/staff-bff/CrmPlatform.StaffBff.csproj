@@ -33,6 +33,6 @@
                       Condition="'$(Configuration)'=='Test'" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\services\_template\CrmPlatform.ServiceTemplate.csproj" />
+    <ProjectReference Include="..\_template\CrmPlatform.ServiceTemplate.csproj" />
   </ItemGroup>
 </Project>

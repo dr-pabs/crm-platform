@@ -49,7 +49,7 @@ app.MapPost("/token", ([FromBody] TokenRequest request) =>
         return Results.BadRequest(new { error = "role is required" });
 
     if (!ValidRoles.Contains(request.Role))
-        return Results.BadRequest(new { error = $"Unknown role: {request.Role}. Valid roles: {string.Join(", ", ValidRoles)}" });
+        return Results.BadRequest(new { error = $"Unknown role: {request.Role}. Valid roles: {string.Join(", ", ValidRoles.All)}" });
 
     var signingKey = AuthStubConstants.GetSigningKey();
     var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);

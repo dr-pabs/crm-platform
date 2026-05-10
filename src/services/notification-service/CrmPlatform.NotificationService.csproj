@@ -15,8 +15,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design"    Version="8.0.4" PrivateAssets="all" />
     <!-- Azure Communication Services -->
     <PackageReference Include="Azure.Communication.Email"    Version="1.0.1" />
-    <PackageReference Include="Azure.Communication.Sms"      Version="1.1.0" />
-    <PackageReference Include="Azure.Messaging.NotificationHubs" Version="1.2.0" />
+    <PackageReference Include="Azure.Communication.Sms"      Version="1.1.0-beta.3" />
+    <PackageReference Include="Microsoft.Azure.NotificationHubs" Version="4.0.0" />
     <!-- Handlebars templating -->
     <PackageReference Include="Handlebars.Net"               Version="2.1.6" />
     <!-- Problem details -->
