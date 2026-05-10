@@ -6,16 +6,15 @@ All rules in the root `/CLAUDE.md` apply here plus the following.
 ## Structure (do not change)
 ```
 src/
-  Controllers/       → Minimal API endpoint mappings or Controller classes
-  Services/          → Business logic (interfaces + implementations)
-  Repositories/      → EF Core data access
-  Models/
-    Entities/        → EF Core entities (must inherit BaseEntity)
-    DTOs/            → Request/response objects (never expose entities directly)
-    Events/          → Service Bus message contracts
+  Api/                → Minimal API endpoint mappings
+  Application/         → Command handlers (one per use case)
+  Domain/
+    Entities/          → EF Core entities (must inherit BaseEntity)
+    Enums/             → Domain enums
+    Events/            → Domain event definitions
   Infrastructure/
-    Data/            → DbContext, migrations, configurations
-    Messaging/       → Service Bus publisher/consumer wiring
+    Data/              → DbContext, entity configurations
+    Messaging/         → Service Bus consumers
 ```
 
 ## BaseEntity
@@ -24,7 +23,7 @@ Every EF Core entity MUST inherit `BaseEntity`:
 public abstract class BaseEntity
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public Guid TenantId { get; set; }          // filtered via HasQueryFilter
+    public Guid TenantId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime ModifiedAt { get; set; }
     public bool IsDeleted { get; set; }
@@ -34,8 +33,8 @@ public abstract class BaseEntity
 
 ## Health Endpoints
 Every service must expose:
-- `GET /health/live`  → liveness (is the process running)
-- `GET /health/ready` → readiness (can it serve traffic — checks DB + Service Bus)
+- `GET /health/live`  → liveness
+- `GET /health/ready` → readiness (checks DB + Service Bus)
 - `GET /health/start` → startup probe
 
 ## Configuration
