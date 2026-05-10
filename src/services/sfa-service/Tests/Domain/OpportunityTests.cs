@@ -18,7 +18,7 @@ public sealed class OpportunityTests
     public void Create_StartsAtQualifyStage()
     {
         var opp = DefaultOpportunity();
-        opp.Stage.Should().Be(OpportunityStage.Qualify);
+        opp.Stage.Should().Be(OpportunityStage.Prospecting);
     }
 
     [Fact]
@@ -34,25 +34,25 @@ public sealed class OpportunityTests
     public void AdvanceStage_Qualify_To_Propose_Succeeds()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Propose);
-        opp.Stage.Should().Be(OpportunityStage.Propose);
+        opp.AdvanceStage(OpportunityStage.Proposal);
+        opp.Stage.Should().Be(OpportunityStage.Proposal);
     }
 
     [Fact]
     public void AdvanceStage_Sequential_RaisesStageChangedEvent()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Propose);
+        opp.AdvanceStage(OpportunityStage.Proposal);
         opp.DomainEvents.Should().Contain(e => e is OpportunityStageChangedEvent sc
-            && sc.PreviousStage == OpportunityStage.Qualify
-            && sc.NewStage      == OpportunityStage.Propose);
+            && sc.PreviousStage == OpportunityStage.Prospecting
+            && sc.NewStage      == OpportunityStage.Proposal);
     }
 
     [Fact]
     public void AdvanceStage_Skipping_Throws()
     {
         var opp = DefaultOpportunity();
-        var act = () => opp.AdvanceStage(OpportunityStage.Negotiate); // skips Propose
+        var act = () => opp.AdvanceStage(OpportunityStage.Negotiation); // skips Propose
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*sequentially*");
     }
@@ -63,8 +63,8 @@ public sealed class OpportunityTests
     public void AdvanceStage_ToWon_FromAnyNonTerminalStage()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Won);
-        opp.Stage.Should().Be(OpportunityStage.Won);
+        opp.AdvanceStage(OpportunityStage.ClosedWon);
+        opp.Stage.Should().Be(OpportunityStage.ClosedWon);
         opp.DomainEvents.Should().Contain(e => e is OpportunityWonEvent);
     }
 
@@ -72,8 +72,8 @@ public sealed class OpportunityTests
     public void AdvanceStage_ToLost_FromAnyNonTerminalStage()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Lost);
-        opp.Stage.Should().Be(OpportunityStage.Lost);
+        opp.AdvanceStage(OpportunityStage.ClosedLost);
+        opp.Stage.Should().Be(OpportunityStage.ClosedLost);
         opp.DomainEvents.Should().Contain(e => e is OpportunityLostEvent);
     }
 
@@ -81,9 +81,9 @@ public sealed class OpportunityTests
     public void AdvanceStage_FromTerminal_Throws()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Won);
+        opp.AdvanceStage(OpportunityStage.ClosedWon);
 
-        var act = () => opp.AdvanceStage(OpportunityStage.Lost);
+        var act = () => opp.AdvanceStage(OpportunityStage.ClosedLost);
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*terminal*");
     }
@@ -94,8 +94,8 @@ public sealed class OpportunityTests
     public void AdvanceStage_FullPath_QualifyToNegotiate()
     {
         var opp = DefaultOpportunity();
-        opp.AdvanceStage(OpportunityStage.Propose);
-        opp.AdvanceStage(OpportunityStage.Negotiate);
-        opp.Stage.Should().Be(OpportunityStage.Negotiate);
+        opp.AdvanceStage(OpportunityStage.Proposal);
+        opp.AdvanceStage(OpportunityStage.Negotiation);
+        opp.Stage.Should().Be(OpportunityStage.Negotiation);
     }
 }

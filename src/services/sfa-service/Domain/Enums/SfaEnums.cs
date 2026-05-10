@@ -11,11 +11,12 @@ public enum LeadStatus
 
 public enum OpportunityStage
 {
-    Qualify    = 1,
-    Propose    = 2,
-    Negotiate  = 3,
-    Won        = 4,
-    Lost       = 5,
+    Prospecting   = 1,
+    Qualification = 2,
+    Proposal      = 3,
+    Negotiation   = 4,
+    ClosedWon     = 5,
+    ClosedLost    = 6,
 }
 
 public enum QuoteStatus

@@ -43,11 +43,11 @@ public sealed class AdvanceStageHandlerTests
         var opp             = await SeedOpportunityAsync(db);
         var handler         = BuildHandler(db);
 
-        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Propose));
+        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Proposal));
 
         result.IsSuccess.Should().BeTrue();
         var refreshed = await db.Opportunities.FindAsync(opp.Id);
-        refreshed!.Stage.Should().Be(OpportunityStage.Propose);
+        refreshed!.Stage.Should().Be(OpportunityStage.Proposal);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public sealed class AdvanceStageHandlerTests
         var handler        = BuildHandler(db);
 
         // Qualify → Negotiate skips Propose
-        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Negotiate));
+        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Negotiation));
 
         result.IsSuccess.Should().BeFalse();
         result.ErrorCode.Should().Be(ResultErrorCode.ValidationError);
@@ -71,11 +71,11 @@ public sealed class AdvanceStageHandlerTests
         var opp            = await SeedOpportunityAsync(db);
         var handler        = BuildHandler(db);
 
-        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Won));
+        var result = await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.ClosedWon));
 
         result.IsSuccess.Should().BeTrue();
         var refreshed = await db.Opportunities.FindAsync(opp.Id);
-        refreshed!.Stage.Should().Be(OpportunityStage.Won);
+        refreshed!.Stage.Should().Be(OpportunityStage.ClosedWon);
     }
 
     [Fact]
@@ -85,11 +85,11 @@ public sealed class AdvanceStageHandlerTests
         var opp            = await SeedOpportunityAsync(db);
         var handler        = BuildHandler(db);
 
-        await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.Won));
+        await handler.HandleAsync(new AdvanceStageCommand(opp.Id, OpportunityStage.ClosedWon));
 
         // Second advance on a terminal opportunity
         var result = await handler.HandleAsync(
-            new AdvanceStageCommand(opp.Id, OpportunityStage.Lost));
+            new AdvanceStageCommand(opp.Id, OpportunityStage.ClosedLost));
 
         result.IsSuccess.Should().BeFalse();
         result.ErrorCode.Should().Be(ResultErrorCode.ValidationError);
@@ -102,7 +102,7 @@ public sealed class AdvanceStageHandlerTests
         var handler        = BuildHandler(db);
 
         var result = await handler.HandleAsync(
-            new AdvanceStageCommand(Guid.NewGuid(), OpportunityStage.Propose));
+            new AdvanceStageCommand(Guid.NewGuid(), OpportunityStage.Proposal));
 
         result.IsSuccess.Should().BeFalse();
         result.ErrorCode.Should().Be(ResultErrorCode.NotFound);

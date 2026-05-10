@@ -19,7 +19,7 @@ public sealed class QuoteTests
     public void Send_BeforeNegotiateStage_Throws()
     {
         var quote = DefaultQuote();
-        var act   = () => quote.Send(OpportunityStage.Propose); // below Negotiate
+        var act   = () => quote.Send(OpportunityStage.Proposal); // below Negotiate
         act.Should().Throw<InvalidOperationException>()
             .WithMessage("*Negotiate*");
     }
@@ -28,7 +28,7 @@ public sealed class QuoteTests
     public void Send_AtNegotiateStage_Succeeds()
     {
         var quote = DefaultQuote();
-        quote.Send(OpportunityStage.Negotiate);
+        quote.Send(OpportunityStage.Negotiation);
         quote.Status.Should().Be(QuoteStatus.Sent);
         quote.DomainEvents.Should().ContainSingle(e => e is QuoteSentEvent);
     }
@@ -37,7 +37,7 @@ public sealed class QuoteTests
     public void Send_AfterNegotiateStage_Succeeds()
     {
         var quote = DefaultQuote();
-        quote.Send(OpportunityStage.Won); // Won > Negotiate
+        quote.Send(OpportunityStage.ClosedWon); // Won > Negotiate
         quote.Status.Should().Be(QuoteStatus.Sent);
     }
 
@@ -47,7 +47,7 @@ public sealed class QuoteTests
     public void Accept_AfterSend_Succeeds()
     {
         var quote = DefaultQuote();
-        quote.Send(OpportunityStage.Negotiate);
+        quote.Send(OpportunityStage.Negotiation);
         quote.Accept();
         quote.Status.Should().Be(QuoteStatus.Accepted);
     }
@@ -56,7 +56,7 @@ public sealed class QuoteTests
     public void Reject_AfterSend_Succeeds()
     {
         var quote = DefaultQuote();
-        quote.Send(OpportunityStage.Negotiate);
+        quote.Send(OpportunityStage.Negotiation);
         quote.Reject();
         quote.Status.Should().Be(QuoteStatus.Rejected);
     }
@@ -91,7 +91,7 @@ public sealed class QuoteTests
     public void UpdateLineItems_AfterSend_Throws()
     {
         var quote = DefaultQuote();
-        quote.Send(OpportunityStage.Negotiate);
+        quote.Send(OpportunityStage.Negotiation);
         var act = () => quote.UpdateLineItems("[]", 0m);
         act.Should().Throw<InvalidOperationException>();
     }
