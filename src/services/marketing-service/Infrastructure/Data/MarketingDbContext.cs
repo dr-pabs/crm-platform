@@ -61,7 +61,7 @@ file sealed class JourneyConfiguration : IEntityTypeConfiguration<Journey>
         b.Property(e => e.StepsJson).IsRequired().HasMaxLength(65_536);
 
         b.HasIndex(e => new { e.TenantId, e.CampaignId });
-        b.HasIndex(e => new { e.TenantId, e.IsPublished });
+        b.HasIndex(e => new { e.TenantId, e.Status });
 
         b.HasMany(e => e.Enrollments)
             .WithOne(e => e.Journey)

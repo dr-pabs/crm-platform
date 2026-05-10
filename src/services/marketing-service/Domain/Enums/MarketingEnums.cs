@@ -29,6 +29,16 @@ public enum EnrollmentStatus
     Failed    = 3   // unrecoverable processing error
 }
 
+
+/// <summary>Journey lifecycle status. Published journeys are frozen.</summary>
+public enum JourneyStatus
+{
+    Draft     = 0,
+    Active    = 1,
+    Paused    = 2,
+    Completed = 3,
+    Archived  = 4
+}
 /// <summary>Email template rendering engine.</summary>
 public enum TemplateEngine
 {
