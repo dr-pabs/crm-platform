@@ -1,6 +1,6 @@
 # ADR 0006 — Frontend Architecture
 
-**Status:** Accepted  
+**Status:** Superseded by ADR 0013  
 **Date:** 2026-04-04  
 **Deciders:** Technical Director  
 **Supersedes:** —  
