@@ -26,7 +26,7 @@ public sealed class CreateCaseHandler(
     {
         var supportCase = Case.Create(
             tenantContext.TenantId,
-            cmd.Title,
+            cmd.Subject,
             cmd.Description,
             cmd.Priority,
             cmd.Channel,

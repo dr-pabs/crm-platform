@@ -74,7 +74,7 @@ public static class CssEndpoints
             CreateCaseHandler handler) =>
         {
             var result = await handler.HandleAsync(new CreateCaseCommand(
-                req.Title, req.Description, req.Priority,
+                req.Subject, req.Description, req.Priority,
                 req.Channel, req.ContactId, req.AccountId));
 
             return result.IsSuccess
@@ -171,7 +171,7 @@ public static class CssEndpoints
     // ─── Projection helpers ───────────────────────────────────────────────────
 
     private static CaseResponse ToCaseResponse(Case c) => new(
-        c.Id, c.Title, c.Description,
+        c.Id, c.Subject, c.Description,
         c.Status.ToString(), c.Priority.ToString(), c.Channel.ToString(),
         c.ContactId, c.AccountId, c.AssignedToUserId,
         c.SlaDeadline, c.SlaBreached,

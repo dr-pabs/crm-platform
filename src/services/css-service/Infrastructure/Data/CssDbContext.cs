@@ -36,7 +36,7 @@ file sealed class CaseConfiguration : IEntityTypeConfiguration<Case>
     {
         b.ToTable("Cases", "css");
         b.HasKey(e => e.Id);
-        b.Property(e => e.Title).IsRequired().HasMaxLength(512);
+        b.Property(e => e.Subject).IsRequired().HasMaxLength(512);
         b.Property(e => e.Description).IsRequired().HasMaxLength(8000);
         b.Property(e => e.Status).HasConversion<string>().IsRequired();
         b.Property(e => e.Priority).HasConversion<string>().IsRequired();
