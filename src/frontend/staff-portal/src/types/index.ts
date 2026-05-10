@@ -221,7 +221,7 @@ export interface UpdateOpportunityRequest {
 
 // ── CS&S — Cases ─────────────────────────────────────────────────────────────
 
-export type CaseStatus = 'Open' | 'Pending' | 'Resolved' | 'Closed';
+export type CaseStatus = 'New' | 'Open' | 'Pending' | 'Escalated' | 'Resolved' | 'Closed';
 export type CasePriority = 'Low' | 'Medium' | 'High' | 'Critical';
 export type SentimentLabel = 'Positive' | 'Neutral' | 'Negative' | 'Mixed';
 
