@@ -289,6 +289,12 @@ export interface AddCaseCommentRequest {
 
 export type CampaignStatus = 'Draft' | 'Active' | 'Paused' | 'Completed' | 'Archived';
 
+
+export interface CreateCampaignRequest {
+  name: string;
+  description?: string;
+  channel?: string;
+}
 export interface Campaign {
   id: string;
   tenantId: string;
