@@ -44,7 +44,7 @@ export function CaseDetail() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="col-span-2">
           <CaseTimeline caseId={caseItem.id} />
         </div>

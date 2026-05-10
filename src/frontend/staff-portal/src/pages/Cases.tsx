@@ -93,7 +93,7 @@ export function Cases() {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">{t('cases.title')}</h1>
         <Button onClick={() => { setCreateOpen(true); }}>{t('cases.newCase')}</Button>
