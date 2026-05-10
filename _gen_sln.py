@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-import uuid
+import hashlib
 
-def new_guid():
-    return str(uuid.uuid4()).upper()
+def new_guid(path):
+    h = hashlib.md5(path.encode()).hexdigest()
+    return f"{h[:8]}-{h[8:12]}-{h[12:16]}-{h[16:20]}-{h[20:32]}".upper()
 
 projects = [
     'src/services/identity-service/CrmPlatform.IdentityService.csproj',
@@ -31,7 +32,7 @@ projects = [
     'src/services/_local/auth-stub/CrmPlatform.AuthStub.csproj',
 ]
 
-guids = [(path, new_guid()) for path in projects]
+guids = [(path, new_guid(path)) for path in projects]
 CS_PROJECT_TYPE = '{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}'
 
 lines = [
