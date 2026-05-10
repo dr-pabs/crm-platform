@@ -23,7 +23,7 @@ public sealed class SfaDbContext(
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder); // global tenant + soft-delete filters first
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfiguration(new LeadConfiguration());
         modelBuilder.ApplyConfiguration(new ContactConfiguration());
@@ -41,7 +41,9 @@ file sealed class LeadConfiguration : IEntityTypeConfiguration<Lead>
     {
         b.ToTable("Leads", "sfa");
         b.HasKey(e => e.Id);
-        b.Property(e => e.Name).IsRequired().HasMaxLength(256);
+        b.Property(e => e.FirstName).IsRequired().HasMaxLength(128);
+        b.Property(e => e.LastName).IsRequired().HasMaxLength(128);
+        b.Property(e => e.JobTitle).HasMaxLength(128);
         b.Property(e => e.Email).IsRequired().HasMaxLength(256);
         b.Property(e => e.Phone).HasMaxLength(50);
         b.Property(e => e.Company).HasMaxLength(256);
@@ -51,7 +53,6 @@ file sealed class LeadConfiguration : IEntityTypeConfiguration<Lead>
 
         b.HasIndex(e => new { e.TenantId, e.Status });
         b.HasIndex(e => new { e.TenantId, e.AssignedToUserId });
-        // Activities are queried by RelatedEntityId — no EF navigation (polymorphic entity)
     }
 }
 

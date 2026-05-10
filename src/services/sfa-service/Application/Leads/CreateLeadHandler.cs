@@ -1,7 +1,7 @@
 using CrmPlatform.SfaService.Domain.Entities;
 using CrmPlatform.SfaService.Domain.Enums;
 using CrmPlatform.SfaService.Infrastructure.Data;
-using CrmPlatform.ServiceTemplate.Application;
+using CrmPlatform.ServiceTemplate.Domain;
 using CrmPlatform.ServiceTemplate.Infrastructure.Messaging;
 using CrmPlatform.ServiceTemplate.Infrastructure.MultiTenancy;
 using Microsoft.EntityFrameworkCore;
@@ -9,12 +9,14 @@ using Microsoft.EntityFrameworkCore;
 namespace CrmPlatform.SfaService.Application.Leads;
 
 public sealed record CreateLeadCommand(
-    string  Name,
-    string  Email,
-    string? Phone,
-    string? Company,
+    string     FirstName,
+    string     LastName,
+    string?    JobTitle,
+    string     Email,
+    string?    Phone,
+    string?    Company,
     LeadSource Source,
-    Guid    CreatedByUserId);
+    Guid       CreatedByUserId);
 
 public sealed class CreateLeadHandler(
     SfaDbContext db,
@@ -25,7 +27,9 @@ public sealed class CreateLeadHandler(
     {
         var lead = Lead.Create(
             tenantContext.TenantId,
-            cmd.Name,
+            cmd.FirstName,
+            cmd.LastName,
+            cmd.JobTitle,
             cmd.Email,
             cmd.Phone,
             cmd.Company,

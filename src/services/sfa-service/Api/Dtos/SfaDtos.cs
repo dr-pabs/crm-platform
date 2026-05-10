@@ -5,15 +5,19 @@ namespace CrmPlatform.SfaService.Api.Dtos;
 // ─── Lead DTOs ────────────────────────────────────────────────────────────────
 
 public sealed record CreateLeadRequest(
-    string     Name,
+    string     FirstName,
+    string     LastName,
+    string?    JobTitle,
     string     Email,
     string?    Phone,
     string?    Company,
     LeadSource Source);
 
 public sealed record UpdateLeadRequest(
-    string  Name,
-    string  Email,
+    string? FirstName,
+    string? LastName,
+    string? JobTitle,
+    string? Email,
     string? Phone,
     string? Company);
 
@@ -28,7 +32,9 @@ public sealed record ConvertLeadRequest(
 
 public sealed record LeadResponse(
     Guid        Id,
-    string      Name,
+    string      FirstName,
+    string      LastName,
+    string?     JobTitle,
     string      Email,
     string?     Phone,
     string?     Company,
@@ -119,7 +125,7 @@ public sealed record AccountResponse(
 public sealed record CreateActivityRequest(
     ActivityType ActivityType,
     Guid         RelatedEntityId,
-    string       RelatedEntityType,   // "Lead" | "Opportunity" | "Contact"
+    string       RelatedEntityType,
     DateTime     OccurredAt,
     string?      Notes);
 
