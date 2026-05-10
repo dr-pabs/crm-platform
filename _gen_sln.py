@@ -30,6 +30,7 @@ projects = [
     'src/functions/sla-orchestrator/CrmPlatform.Functions.SlaOrchestrator.csproj',
     'src/services/_template/CrmPlatform.ServiceTemplate.csproj',
     'src/services/_local/auth-stub/CrmPlatform.AuthStub.csproj',
+    'src/services/staff-bff/CrmPlatform.StaffBff.csproj',
 ]
 
 guids = [(path, new_guid(path)) for path in projects]

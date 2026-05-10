@@ -1,3 +1,4 @@
+using CrmPlatform.CssService.Domain.Enums;
 using CrmPlatform.CssService.Domain.Events;
 using CrmPlatform.CssService.Infrastructure.Data;
 using CrmPlatform.ServiceTemplate.Infrastructure.Messaging;
@@ -17,13 +18,35 @@ public static class CssInternalEndpoints
 {
     public static IEndpointRouteBuilder MapCssInternalEndpoints(this IEndpointRouteBuilder app)
     {
-        var internal_ = app.MapGroup("/internal/cases");
+        var internal_ = app.MapGroup("/internal");
         // No RequireAuthorization — internal network only.
         // Add .RequireHost("localhost") or internal API key middleware in production.
 
+        // ─── GET /internal/bff/summary ────────────────────────────────────────
+        // Called by staff-bff to populate the dashboard aggregate.
+        internal_.MapGet("/bff/summary", async (CssDbContext db, CancellationToken ct) =>
+        {
+            var weekAgo = DateTime.UtcNow.AddDays(-7);
+
+            var open             = await db.Cases.CountAsync(c => c.Status != CaseStatus.Resolved && c.Status != CaseStatus.Closed, ct);
+            var breached         = await db.Cases.CountAsync(c => c.SlaBreached, ct);
+            // UpdatedAt is the closest proxy for resolution time (set on every state change)
+            var resolvedThisWeek = await db.Cases.CountAsync(c => c.Status == CaseStatus.Resolved && c.UpdatedAt >= weekAgo, ct);
+
+            var avgHours = await db.Cases
+                .Where(c => c.Status == CaseStatus.Resolved && c.CreatedAt >= weekAgo)
+                .Select(c => EF.Functions.DateDiffHour(c.CreatedAt, c.UpdatedAt))
+                .DefaultIfEmpty(0)
+                .AverageAsync(ct);
+
+            return Results.Ok(new CssBffSummaryResponse(open, breached, resolvedThisWeek, avgHours));
+        });
+
+        var cases_ = internal_.MapGroup("/cases");
+
         // ─── PATCH /internal/cases/{id}/instance-id ───────────────────────────
         // Called by sla-orchestrator to store the Durable Function InstanceId.
-        internal_.MapPatch("/{id:guid}/instance-id", async (
+        cases_.MapPatch("/{id:guid}/instance-id", async (
             Guid id,
             SetInstanceIdRequest req,
             CssDbContext db,
@@ -48,7 +71,7 @@ public static class CssInternalEndpoints
 
         // ─── POST /internal/cases/{id}/sla-warning ────────────────────────────
         // Called by sla-orchestrator at the 80% SLA duration threshold.
-        internal_.MapPost("/{id:guid}/sla-warning", async (
+        cases_.MapPost("/{id:guid}/sla-warning", async (
             Guid id,
             TenantRequest req,
             CssDbContext db,
@@ -83,7 +106,7 @@ public static class CssInternalEndpoints
 
         // ─── POST /internal/cases/{id}/sla-breach ────────────────────────────
         // Called by sla-orchestrator when the SLA deadline has elapsed.
-        internal_.MapPost("/{id:guid}/sla-breach", async (
+        cases_.MapPost("/{id:guid}/sla-breach", async (
             Guid id,
             TenantRequest req,
             CssDbContext db,
@@ -122,3 +145,8 @@ public static class CssInternalEndpoints
 
 public sealed record SetInstanceIdRequest(string InstanceId, Guid TenantId);
 public sealed record TenantRequest(Guid TenantId);
+public sealed record CssBffSummaryResponse(
+    int    Open,
+    int    BreachedSla,
+    int    ResolvedThisWeek,
+    double AvgResolutionHours);
