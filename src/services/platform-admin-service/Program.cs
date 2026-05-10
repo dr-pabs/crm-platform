@@ -1,6 +1,8 @@
+using Azure.Messaging.ServiceBus.Administration;
 using CrmPlatform.PlatformAdminService.Api;
 using CrmPlatform.PlatformAdminService.Application.Tenants;
 using CrmPlatform.PlatformAdminService.Infrastructure.Data;
+using CrmPlatform.PlatformAdminService.Infrastructure.Provisioning;
 using CrmPlatform.ServiceTemplate.Infrastructure;
 using CrmPlatform.ServiceTemplate.Infrastructure.Messaging;
 using Hellang.Middleware.ProblemDetails;
@@ -19,6 +21,19 @@ builder.Services.AddDbContext<PlatformDbContext>(options =>
 
 // ─── Idempotency store ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IIdempotencyStore, PlatformIdempotencyStore>();
+
+// ─── Tenant infrastructure provisioner ───────────────────────────────────────
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<ITenantInfraProvisioner, NoOpTenantInfraProvisioner>();
+}
+else
+{
+    var sbNamespace = builder.Configuration["ServiceBus:FullyQualifiedNamespace"]
+        ?? throw new InvalidOperationException("ServiceBus:FullyQualifiedNamespace is required");
+    builder.Services.AddSingleton(new ServiceBusAdministrationClient(sbNamespace));
+    builder.Services.AddScoped<ITenantInfraProvisioner, AzureTenantInfraProvisioner>();
+}
 
 // ─── Application handlers ─────────────────────────────────────────────────────
 builder.Services.AddScoped<ProvisionTenantHandler>();
