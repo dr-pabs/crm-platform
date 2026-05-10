@@ -84,7 +84,7 @@ jobs:
           sleep 60
           APIM_URL="${{ env.APIM_URL }}"
           EXIT_CODE=0
-          for service_path in sfa css marketing analytics identity notification platform; do
+          for service_path in sfa css marketing analytics identity notification platform staff-bff; do
             HTTP_STATUS=$(curl -sS -o /dev/null -w "%{http_code}" \
               "${APIM_URL}/api/v1/${service_path}/health/ready" \
               --retry 5 --retry-delay 10 || echo "000")
