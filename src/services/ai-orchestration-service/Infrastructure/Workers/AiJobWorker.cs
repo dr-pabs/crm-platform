@@ -189,6 +189,18 @@ public sealed class AiJobWorker(
                     break;
 
                 // ── SMS composition ───────────────────────────────────────────
+                case CapabilityType.KnowledgeQuery:
+                    await ProcessKnowledgeQueryAsync(job, claude, db, publisher, ct);
+                    break;
+
+                case CapabilityType.PipelineForecasting:
+                    await ProcessPipelineForecastAsync(job, claude, db, publisher, ct);
+                    break;
+
+                case CapabilityType.ChurnPrediction:
+                    await ProcessChurnPredictionAsync(job, claude, db, publisher, ct);
+                    break;
+
                 case CapabilityType.SmsComposition:
                     aiResponse = await claude.CompleteAsync(job.TenantId, job.CapabilityType, job.UseCase, input, ct);
                     result     = RecordResult(db, job, aiResponse);
@@ -314,6 +326,14 @@ public sealed class AiJobWorker(
             job.TenantId, entityId, entityType, job.Id,
             parsed.Action, parsed.Rationale), ct);
     }
+
+    private async Task ProcessKnowledgeQueryAsync(AiJob j, IClaudeClient c, AiDbContext d, ServiceBusEventPublisher p, CancellationToken ct) { var r = await c.CompleteAsync(j.TenantId, j.CapabilityType, j.UseCase, ParsePayload(j.InputPayload), ct); j.MarkCompleted(); RecordResult(d, j, r); await d.SaveChangesAsync(ct); }
+
+    private async Task ProcessPipelineForecastAsync(AiJob j, IClaudeClient c, AiDbContext d, ServiceBusEventPublisher p, CancellationToken ct) { var r = await c.CompleteAsync(j.TenantId, j.CapabilityType, j.UseCase, ParsePayload(j.InputPayload), ct); j.MarkCompleted(); RecordResult(d, j, r); await d.SaveChangesAsync(ct); }
+
+    private async Task ProcessChurnPredictionAsync(AiJob j, IClaudeClient c, AiDbContext d, ServiceBusEventPublisher p, CancellationToken ct) { var r = await c.CompleteAsync(j.TenantId, j.CapabilityType, j.UseCase, ParsePayload(j.InputPayload), ct); j.MarkCompleted(); RecordResult(d, j, r); await d.SaveChangesAsync(ct); }
+
+    private static object ParsePayload(string json) => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(json)!;
 
     private async Task PublishJourneyPersonalisedAsync(
         AiJob job, ClaudeResponse r, ServiceBusEventPublisher p, CancellationToken ct)

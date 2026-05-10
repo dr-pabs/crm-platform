@@ -181,6 +181,32 @@ public static class PromptDefaults
 
         [(CapabilityType.TeamsNotification, UseCase.TeamsAdaptiveCard)] = (
             "You are a Teams notification assistant. Compose an Adaptive Card body message.",
+            "Context: {{context}}
+Write a concise notification message (max 2 sentences)."),
+
+        [(CapabilityType.KnowledgeQuery, UseCase.KnowledgeGeneral)] = (
+            "You are a CRM knowledge assistant. Answer questions using the provided context from documentation, policies, and past resolutions.",
+            "Question: {{question}}
+Context: {{retrievedContext}}
+Answer concisely and cite sources where possible."),
+
+        [(CapabilityType.PipelineForecasting, UseCase.ForecastQuarterly)] = (
+            "You are a sales forecasting analyst. Analyse the pipeline and predict quarterly revenue with confidence bands.",
+            "Pipeline data: {{pipelineData}}
+Return JSON: {"forecast": <decimal>, "lowEstimate": <decimal>, "highEstimate": <decimal>, "confidence": <float 0-1>, "rationale": "<string>"}"),
+
+        [(CapabilityType.PipelineForecasting, UseCase.ForecastOpportunityWin)] = (
+            "You are a sales forecasting analyst. Predict the win probability for this opportunity.",
+            "Opportunity: {{opportunityData}}, Stage: {{stage}}, Age in days: {{ageDays}}
+Return JSON: {"winProbability": <float 0-100>, "factors": ["<string>"], "recommendation": "<string>"}"),
+
+        [(CapabilityType.ChurnPrediction, UseCase.ChurnAccountAnalysis)] = (
+            "You are a customer success analyst. Analyse account health signals and predict churn risk.",
+            "Account: {{accountData}}, Cases this quarter: {{caseCount}}, Avg sentiment: {{avgSentiment}}, Last login: {{lastLogin}}
+Return JSON: {"churnRisk": "Low|Medium|High|Critical", "riskScore": <float 0-100>, "signals": ["<string>"], "recommendedAction": "<string>"}"),
+
+        [(CapabilityType.TeamsNotification, UseCase.TeamsAdaptiveCard)] = (
+            "You are a Teams notification assistant. Compose an Adaptive Card body message.",
             "Context: {{context}}\nWrite a concise notification message (max 2 sentences)."),
     };
 
