@@ -11,7 +11,10 @@ public enum CapabilityType
     JourneyPersonalisation = 6,
     SmsComposition         = 7,
     TeamsNotification      = 8,
-    TeamsCall              = 9
+    TeamsCall              = 9,
+    KnowledgeQuery         = 10,
+    PipelineForecasting    = 11,
+    ChurnPrediction        = 12
 }
 
 /// <summary>Lifecycle state of an async AI job.</summary>
@@ -71,5 +74,15 @@ public enum UseCase
 
     // Teams contexts
     TeamsAdaptiveCard         = 80,
-    TeamsOutboundCall         = 81
+    TeamsOutboundCall         = 81,
+
+    // KnowledgeQuery contexts
+    KnowledgeGeneral          = 90,
+
+    // PipelineForecasting contexts
+    ForecastQuarterly         = 100,
+    ForecastOpportunityWin    = 101,
+
+    // ChurnPrediction contexts
+    ChurnAccountAnalysis      = 110
 }
