@@ -1,0 +1,105 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM AI Orchestration",
+    "version": "1.0.0",
+    "description": "AI capabilities for M365 Copilot integration"
+  },
+  "servers": [
+    {
+      "url": "/ai"
+    }
+  ],
+  "paths": {
+    "/email-draft": {
+      "post": {
+        "operationId": "DraftEmail",
+        "summary": "Generate an AI email draft",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "leadName": {
+                    "type": "string"
+                  },
+                  "company": {
+                    "type": "string"
+                  },
+                  "productInterest": {
+                    "type": "string"
+                  },
+                  "useCase": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email draft generated"
+          }
+        }
+      }
+    },
+    "/case-summarise": {
+      "post": {
+        "operationId": "SummariseCase",
+        "summary": "Summarise a support case using AI",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "caseId": {
+                    "type": "string"
+                  },
+                  "caseData": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Summarisation queued"
+          }
+        }
+      }
+    },
+    "/teams-notification": {
+      "post": {
+        "operationId": "SendTeamsNotification",
+        "summary": "Send an AI-composed Teams Adaptive Card",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cardTitle": {
+                    "type": "string"
+                  },
+                  "context": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Teams card sent"
+          }
+        }
+      }
+    }
+  }
+}
