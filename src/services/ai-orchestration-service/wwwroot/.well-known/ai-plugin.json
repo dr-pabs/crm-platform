@@ -20,5 +20,43 @@
   },
   "logo_url": "/ai/logo.png",
   "contact_email": "admin@crm-platform.example",
-  "legal_info_url": "https://crm-platform.example/legal"
+  "legal_info_url": "https://crm-platform.example/legal",
+  "functions": [
+    {
+      "name": "DraftEmail",
+      "description": "Generate a professional email draft for a lead or customer"
+    },
+    {
+      "name": "SummariseCase",
+      "description": "Summarise a support case including issue and resolution"
+    },
+    {
+      "name": "SendTeamsNotification",
+      "description": "Send an AI-composed Teams Adaptive Card notification"
+    },
+    {
+      "name": "AnalyseSentiment",
+      "description": "Analyse the sentiment of a customer comment"
+    },
+    {
+      "name": "ScoreLead",
+      "description": "Score a sales lead from 0-100 with rationale"
+    },
+    {
+      "name": "NextBestAction",
+      "description": "Recommend the next best action for a lead or opportunity"
+    },
+    {
+      "name": "QueryKnowledge",
+      "description": "Answer CRM questions using documentation and past resolutions"
+    },
+    {
+      "name": "ForecastPipeline",
+      "description": "Predict quarterly pipeline revenue and win probability"
+    },
+    {
+      "name": "PredictChurn",
+      "description": "Analyse account health and predict churn risk"
+    }
+  ]
 }
