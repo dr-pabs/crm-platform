@@ -36,6 +36,13 @@ public sealed class AiResult
     public DateTime RecordedAt    { get; private set; }
 
     // ── Factory ──────────────────────────────────────────────────────────────
+    public void RecordFeedback(string? feedback, string? editedOutput, bool isAccepted)
+    {
+        Feedback     = feedback;
+        EditedOutput = editedOutput;
+        IsAccepted   = isAccepted;
+    }
+
     public static AiResult Record(
         Guid           tenantId,
         Guid?          jobId,
