@@ -188,12 +188,8 @@ public static class AiEndpoints
             http.Response.ContentType = "text/event-stream";
             http.Response.Headers.Append("Cache-Control", "no-cache");
             var result = await handler.DraftEmailAsync(req, ct);
-            await http.Response.WriteAsync($"data: {System.Text.Json.JsonSerializer.Serialize(new { content = result.Content })}
-
-", ct);
-            await http.Response.WriteAsync("data: [DONE]
-
-", ct);
+            await http.Response.WriteAsync($"data: {System.Text.Json.JsonSerializer.Serialize(new { content = result.Content })}\n\n", ct);
+            await http.Response.WriteAsync("data: [DONE]\n\n", ct);
             await http.Response.CompleteAsync();
         })
         .WithName("DraftEmailStream")
